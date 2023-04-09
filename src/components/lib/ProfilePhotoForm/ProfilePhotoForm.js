@@ -5,6 +5,9 @@ import { AuthContext } from '../../../machines';
 
 function ProfilePhotoForm({ currentPhoto, onPhotoChange }) {
   const { authenticator } = React.useContext(AuthContext);
+  if (!authenticator.user) {
+    return <i />
+  }
 
   return (
     <TextPopover

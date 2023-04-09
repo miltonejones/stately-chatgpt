@@ -16,12 +16,8 @@ function App() {
   }));
 
   return (
-    <AuthContext.Provider value={{ authenticator }}>
-  
-
-<ChatPane handler={chat} />
-
-
+    <AuthContext.Provider value={{ authenticator }}> 
+      <ChatPane handler={chat} /> 
     </AuthContext.Provider>
   );
 }

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Popover, Stack, Box, Collapse, TextField } from '@mui/material'; 
+import { Popover, MenuItem, Stack, Box, Collapse, TextField } from '@mui/material'; 
 import { useMenu } from '../machines';
 import Flex from './Flex';
 import Spacer from './Spacer';
@@ -12,6 +12,7 @@ import Btn from './Btn';
 const TextPopover = ({ 
   children,
   value,
+  options = [],
   description,
   onChange,
   okayText = 'Okay',
@@ -61,7 +62,7 @@ const TextPopover = ({
             </Flex>
 
             <Nowrap variant="body1">{description}</Nowrap>
-
+ 
             {!!menu.data && (
               <TextField
                 autoFocus
@@ -79,8 +80,12 @@ const TextPopover = ({
                 autoComplete="off"
                 value={menu.data[props.name]}
                 onChange={handleChange}
+                select={!!options.length}
                 {...props}
-              />
+              >
+                {options.map(option => <MenuItem value={option.value}>{option.label}</MenuItem> )}
+
+              </TextField>
             )}
           </Stack>
           <Flex

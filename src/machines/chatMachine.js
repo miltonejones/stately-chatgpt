@@ -1,7 +1,25 @@
 
 import { createMachine, assign } from 'xstate';
 import { useMachine } from "@xstate/react";
+import { useMediaQuery, useTheme } from '@mui/material';
 import { Storage } from 'aws-amplify';
+import { removeBackslashStrings } from '../util/removeBackslashStrings';
+
+
+const demoLanguages = { 
+  Danish: 'da-DK',
+  Dutch: 'nl-NL',
+  English: 'en-US',
+  French: 'fr-FR',
+  German: 'de-DE', 
+  Italian: 'it-IT',
+  Japanese: 'ja-JP', 
+  'Portuguese (Portugal, Brazil)': 'pt-PT', 
+  Spanish: 'es-ES',
+};
+
+const DEFAULT_LANG = 'en-US';
+
 
 // add machine code
 const chatMachine = createMachine({
@@ -111,6 +129,10 @@ const chatMachine = createMachine({
         response: {
           description:
             'Render response to UI and wait for next question in this session',
+          always: {
+            target: '#chat_gpt.speak',
+            cond: 'isVocal',
+          },
           on: {
             ASK: {
               target: '#chat_gpt.listening',
@@ -140,6 +162,58 @@ const chatMachine = createMachine({
         ],
       },
     },
+    clearing: {
+      invoke: {
+        src: "dropSession",
+        onDone: [
+          {
+            target: "idle",
+          },
+        ],
+      },
+    },
+
+
+    speak: {
+      initial: 'read_text',
+      states: {
+        read_text: {
+          always: [
+            {
+              target: 'say_text',
+              cond: 'isDefaultLang',
+            },
+            {
+              target: 'translate',
+            },
+          ],
+        },
+        say_text: {
+          description: 'Use speech utterance object to vocalize the result',
+          invoke: {
+            src: 'speakText',
+            onDone: [
+              {
+                target: '#chat_gpt.request.response',
+                actions: "clearText"
+              },
+            ],
+          },
+        },
+        translate: {
+          invoke: {
+            src: 'loadTranslation',
+            onDone: [
+              {
+                target: 'say_text',
+                actions: 'assignTranslate',
+              },
+            ],
+          },
+        },
+      },
+    },
+
   },
   on: {
     CHANGE: {
@@ -153,12 +227,18 @@ const chatMachine = createMachine({
     },
     AUTH: {
       actions: "assignUser",
+      target: ".idle.loading",
+    },
+    CLEAR: {
+      target: ".clearing",
     },
   },
   context: {
     sessions: {}, 
     answers: [],
     temperatureIndex: 1,
+    lang_code: 'es-ES', // 'en-US',
+    demoLanguages,
     tempProps: [
        {
         value: 0.1,
@@ -186,7 +266,13 @@ const chatMachine = createMachine({
   preserveActionOrder: true,
 },
 {
+  guards: {
+    isVocal: context => !!context.responseText?.length && !context.silent,
+    isDefaultLang: context => context.lang_code === DEFAULT_LANG
+
+  },
   actions: {
+    clearText: assign({ responseText: null }),
     assignTest: assign((_, event) => { 
       return {
         requestText: "show me a sample react function using the AWS SDK that saves a file to NoSQL using aws-amplify. use the currently logged in username as the file id"
@@ -254,8 +340,12 @@ const chatMachine = createMachine({
       if (!choices?.length) return {
         responseText: "Could not parse response"
       }
-
       const { message } = choices[0];
+
+
+      // if (!context.silent) {
+      //   speek(message.content)
+      // }
 
       return {
         responseText: message.content,
@@ -266,10 +356,22 @@ const chatMachine = createMachine({
         }].concat (context.answers) 
       }
     }),
+
+    assignTranslate: assign((context, event) => {
+      const { lang_code } = context;
+      const [ code ] = lang_code.split('-');
+      const prop = event.data[code];
+      return {
+        responseText: prop.value,
+        translation: ""
+      }
+    }),
+
+    // say: context => speek(context.message, context.lang_code),
   }
 });
 
-export const useChat = () => {
+export const useChat = () => {  
   const [state, send] = useMachine(chatMachine, {
     services: {
       loadModels: async() => {
@@ -306,6 +408,10 @@ export const useChat = () => {
           }) 
         } 
       },
+      speakText: async (context) => {
+        const { responseText, lang_code } = context;
+        speek(responseText, lang_code)
+      },
       storeSession: async(context) => {
         localStorage.setItem('goat-chat', JSON.stringify(context.sessions));
         if (!context.user) return;
@@ -315,8 +421,21 @@ export const useChat = () => {
           contentType: 'application/json'
         }); 
       },
+      dropSession: async(context) => {
+        localStorage.removeItem('goat-chat');
+        if (!context.user) return;
+        const { userDataKey } = context.user;  
+        const filename = `${userDataKey}.json`; 
+        await Storage.remove(filename); 
+      },
       startListening: async() => {
         return recognition.start();
+      },
+
+      loadTranslation: async(context) => {
+        const { responseText, lang_code } = context; 
+        const [ code ] = lang_code.split('-');
+        return await translateText(code, removeBackslashStrings(responseText));
       },
       sendChatRequest: async(context) => {
         const { answers, tempProps, temperatureIndex } = context;
@@ -336,9 +455,13 @@ export const useChat = () => {
     });
   }); 
 
+  const theme = useTheme();
+  const isMobileViewPort = useMediaQuery(theme.breakpoints.down('md'));
+
   return {
     state,
     send, 
+    isMobileViewPort,
     ...state.context
   };
 }
@@ -381,7 +504,32 @@ const getModels = async () => {
   const json = await response.json(); 
   return json;
 };
+ 
+
+const utterThis = new SpeechSynthesisUtterance()
+const speek = (msg, lang) => {  
+  const synth = window.speechSynthesis;
+  utterThis.lang = lang || "en-US";
+  utterThis.text = removeBackslashStrings(msg)
+  synth.speak(utterThis)
+}
 
 
 
+const API_ENDPOINT = 'https://69ksjlqa37.execute-api.us-east-1.amazonaws.com';
 
+
+export const translateText = async (target, value) => {
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      source: 'en',
+      value,
+      target: [target]
+    }),
+  };
+  const response = await fetch(API_ENDPOINT, requestOptions );
+  return await response.json();
+};
+ 
