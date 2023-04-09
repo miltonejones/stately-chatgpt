@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-statelychatgpt-dev-221428-authRole",
+      "UnauthRoleArn": "arn:aws:iam::123823813021:role/amplify-statelychatgpt-dev-221428-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::123823813021:role/amplify-statelychatgpt-dev-221428-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-statelychatgpt-dev-221428-deployment",
+      "UnauthRoleName": "amplify-statelychatgpt-dev-221428-unauthRole",
+      "StackName": "amplify-statelychatgpt-dev-221428",
+      "StackId": "arn:aws:cloudformation:us-east-1:123823813021:stack/amplify-statelychatgpt-dev-221428/a4575f50-d684-11ed-a363-1297db8b8e7d",
+      "AmplifyAppId": "d15qbe2mb9nvbb"
+    },
+    "categories": {
+      "auth": {
+        "statelychatgpte0dca135": {}
+      },
+      "storage": {
+        "chatlog": {}
+      }
+    }
+  }
+}

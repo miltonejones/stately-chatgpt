@@ -19,6 +19,7 @@ pre::before {
   padding: 8px;
   background-color: #ebebeb;
   cursor: pointer;
+  opacity: 0.3;
 }
 
 body {

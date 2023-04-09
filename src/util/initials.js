@@ -1,0 +1,1 @@
+export const initials = str => str.split(' ').map(f => f.substr(0,1).toUpperCase);
