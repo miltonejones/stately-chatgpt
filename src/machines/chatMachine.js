@@ -95,6 +95,7 @@ const chatMachine = createMachine({
       initial: 'query',
       states: {
         query: {
+          entry: "assignTime",
           description:
             'Send request to ChatGPT API and append answer to session',
           invoke: {
@@ -206,6 +207,11 @@ const chatMachine = createMachine({
         } 
       }
     }),
+    assignTime: assign((_, event) => {
+      return {
+        timestamp: new Date().getTime()
+      } 
+    }),
     assignModels: assign((_, event) => {
       return {
         models: event.data
@@ -254,6 +260,7 @@ const chatMachine = createMachine({
       return {
         responseText: message.content,
         answers: [{
+          responseTime: new Date().getTime() - context.timestamp,
           question: context.requestText,
           answer: message.content
         }].concat (context.answers) 
@@ -304,7 +311,7 @@ export const useChat = () => {
         if (!context.user) return;
         const { userDataKey } = context.user;  
         const filename = `${userDataKey}.json`; 
-        await Storage.put(filename, JSON.stringify(context.pins), {
+        await Storage.put(filename, JSON.stringify(context.sessions), {
           contentType: 'application/json'
         }); 
       },

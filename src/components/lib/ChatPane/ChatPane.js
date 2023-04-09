@@ -5,7 +5,8 @@ import {
   CircularProgress,
   IconButton,
   Stack,
-  Card
+  Card,
+  Badge
 } from '@mui/material';
 import {
   Columns,
@@ -15,6 +16,7 @@ import {
   TextIcon,
   IconTextField,
   TinyButton,
+  Spacer
 } from '../../../styled';
 import ReactMarkdown from 'react-markdown';
 import Login from '../Login/Login';
@@ -29,8 +31,7 @@ function CodeBlock({ language, value }) {
 
   return (
     <pre>
-      This is the code
-      <code dangerouslySetInnerHTML={{ __html: value }} />
+     {value}
     </pre>
   );
 }
@@ -71,9 +72,9 @@ const ChatPane = ({ handler }) => {
   const disabled = !handler.state.matches('request.response');
   const listening = handler.state.matches('listening');
   const busy = handler.state.matches('request.query');
-  const renderers = {
-    code: CodeBlock,
-  };
+  // const renderers = {
+  //   code: CodeBlock,
+  // };
 
   const priorQuestions = Object.keys(handler.sessions);
   const firstQuestion = !handler.answers.length 
@@ -89,24 +90,28 @@ const ChatPane = ({ handler }) => {
       >
         <Box
           sx={{
-            height: '100%',
+            height: 'calc(100vh - 12px)',
             backgroundColor: (theme) => theme.palette.grey[100],
             pt: 1,
           }}
         >
           {/* {JSON.stringify(handler.state.value)} */}
 
-          <Box sx={{ p: (theme) => theme.spacing(0, 1) }}>
+          <Flex sx={{ p: (theme) => theme.spacing(2, 1) }}>
+            <Badge badgeContent="+" color="warning">
+            <Nowrap variant="h6" bold>GoatGPT</Nowrap>
+            </Badge>
+            <Spacer />
             <Btn
+              size="small"
               startIcon={<TextIcon icon="Add" />}
-              variant="contained"
-              fullWidth
+              variant="outlined" 
               disabled={disabled}
               onClick={() => handler.send('QUIT')}
             >
               new chat
             </Btn>
-          </Box>
+          </Flex>
 
           <Box sx={{ p: (theme) => theme.spacing(0, 1),
               display: 'flex',
@@ -149,7 +154,7 @@ const ChatPane = ({ handler }) => {
  
 
             <Login >
-              <Bar>
+              <Bar sx={{ mb: 4 }}>
                 <TinyButton icon="Lock" />
               <Nowrap hover>Sign {!!handler.user ? "Out" : "In"}</Nowrap>
               </Bar>
@@ -279,11 +284,15 @@ const ChatPane = ({ handler }) => {
                         }}
                       >
                         <Question wrap small>
-                          {response.question}
+                          {response.question} 
                         </Question>
+                        <Spacer />
+                        <Nowrap tiny muted>
+                          {response.responseTime/1000}s
+                        </Nowrap>
                       </Flex>
 
-                      <ReactMarkdown renderers={renderers} key={i}>
+                      <ReactMarkdown  key={i}>
                         {response.answer}
                       </ReactMarkdown>
                     </>
