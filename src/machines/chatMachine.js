@@ -4,6 +4,8 @@ import { useMachine } from "@xstate/react";
 import { useMediaQuery, useTheme } from '@mui/material';
 import { Storage } from 'aws-amplify';
 import { removeBackslashStrings } from '../util/removeBackslashStrings';
+import { uniqueId } from '../util/uniqueId';
+import useClipboard from '../hooks/useClipboard';
 
 
 const demoLanguages = { 
@@ -126,19 +128,39 @@ const chatMachine = createMachine({
             ],
           },
         },
+
         response: {
-          description:
-            'Render response to UI and wait for next question in this session',
-          always: {
-            target: '#chat_gpt.speak',
-            cond: 'isVocal',
+          description: "Render response to UI and wait for next question in this session",
+          initial: "pause",
+          states: {
+            pause: {
+              after: {
+                "1000": [
+                  {
+                    target: "#chat_gpt.speak",
+                    cond: "isVocal",
+                  },
+                  {
+                  target: "#chat_gpt.request.response.rendered",
+                  actions: [],
+                  description: "Pause to let answers render",
+                  internal: false,
+                }],
+              }, 
+            },
+            rendered: {
+              invoke: {
+                src: "assignClicks",
+              }
+            },
           },
           on: {
             ASK: {
-              target: '#chat_gpt.listening',
+              target: "#chat_gpt.listening",
             },
             TEXT: {
-              target: 'query',
+              target: "query",
+              actions: "assignIndex"
             },
           },
         },
@@ -239,6 +261,21 @@ const chatMachine = createMachine({
     temperatureIndex: 1,
     lang_code: 'es-ES', // 'en-US',
     demoLanguages,
+    responseType: 'text',
+    typeProps:  [
+        {
+        icon: "TextFields",
+        caption:"Return text answers to chat prompts",
+        value: "text",
+        label: "Conversations"
+      },
+      {
+        icon: "Photo",
+        caption:"Return images you describe",
+        value: "image",
+        label: "Images"
+      }
+    ],
     tempProps: [
        {
         value: 0.1,
@@ -253,9 +290,9 @@ const chatMachine = createMachine({
         caption: "More creativity, less precise verbose responses",
         color: "secondary"
        },
-
+ 
        {
-        value: 0.6,
+        value: 0.9,
         label: "Creative",
         caption: "Use this option when you're feeling lucky",
         color: "error"
@@ -308,6 +345,11 @@ const chatMachine = createMachine({
         user: event.user
       } 
     }),
+    assignIndex: assign((_, event) => {
+      return {
+        start_index: event.index
+      } 
+    }),
     assignSession: assign((_, event) => {
       return {
         sessions: event.data
@@ -335,24 +377,39 @@ const chatMachine = createMachine({
       }
     }),
     assignResponse: assign((context, event) => { 
+      const { requestText, responseType } = context;
+      const { data, choices } = event.data;
 
-      const { choices } = event.data;
+      if (responseType === 'image') {
+         const { url } = data[0]
+        
+          return {
+            responseText: url,
+            requestText: "",
+            answers: [{
+              responseType,
+              responseTime: new Date().getTime() - context.timestamp,
+              question: context.requestText,
+              answer: `![${requestText}](${url})`,
+              id: uniqueId()
+            }].concat (context.answers) 
+          }
+
+      }
+
       if (!choices?.length) return {
         responseText: "Could not parse response"
       }
-      const { message } = choices[0];
-
-
-      // if (!context.silent) {
-      //   speek(message.content)
-      // }
+      const { message } = choices[0]; 
 
       return {
         responseText: message.content,
+        requestText: "",
         answers: [{
           responseTime: new Date().getTime() - context.timestamp,
           question: context.requestText,
-          answer: message.content
+          answer: message.content,
+          id: uniqueId()
         }].concat (context.answers) 
       }
     }),
@@ -365,13 +422,13 @@ const chatMachine = createMachine({
         responseText: prop.value,
         translation: ""
       }
-    }),
-
-    // say: context => speek(context.message, context.lang_code),
+    }), 
   }
 });
 
 export const useChat = () => {  
+  const clipboard = useClipboard()
+
   const [state, send] = useMachine(chatMachine, {
     services: {
       loadModels: async() => {
@@ -432,16 +489,33 @@ export const useChat = () => {
         return recognition.start();
       },
 
+      assignClicks: async (context) => {
+        const handleClick = event => {
+          clipboard.copy (event.target.innerText);
+        }
+        attachPreclick(handleClick);
+      },
+
       loadTranslation: async(context) => {
         const { responseText, lang_code } = context; 
         const [ code ] = lang_code.split('-');
         return await translateText(code, removeBackslashStrings(responseText));
       },
       sendChatRequest: async(context) => {
-        const { answers, tempProps, temperatureIndex } = context;
-        const { value } = tempProps[temperatureIndex]
-        const convo = answers.map(q => ({"role": "user", "content": q.question}))
-          .concat({"role": "user", "content": context.requestText})
+        const { requestText, responseType, answers, tempProps, temperatureIndex, start_index } = context;
+        const { value } = tempProps[temperatureIndex];
+        const create = q => ({"role": "user", "content": q.question});
+        const size = isMobileViewPort ? 256 : 1024;
+
+        const convo = !!start_index 
+          ? answers.slice(0, start_index + 1).map(create) 
+          : answers.map(create)
+              .concat({"role": "user", "content": requestText});
+
+        if (responseType === 'image') {
+          return generateImage(requestText, size)
+        }
+
         return await generateText (convo, value)
       },
    },
@@ -470,6 +544,32 @@ const recognition = new window.webkitSpeechRecognition();
 recognition.lang = 'en-US';
 recognition.continuous = true; 
 
+
+const generateImage = async(prompt, width) => { 
+  const model = 'image-alpha-001';
+  const num_images = 1;
+  const size = `${width}x${width}`;
+  const response_format = 'url';
+  const message = {
+    prompt,
+    model,
+    num_images,
+    size,
+    response_format,
+  }
+  const requestOptions = {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.REACT_APP_API_KEY}`,
+    },
+    body: JSON.stringify(message ),
+  };
+  const response = await fetch('https://api.openai.com/v1/images/generations', requestOptions );
+  const json = await response.json();
+  return json;
+ 
+}
 
 
 const generateText = async (messages, temperature) => {
@@ -533,3 +633,19 @@ export const translateText = async (target, value) => {
   return await response.json();
 };
  
+
+
+
+
+function attachPreclick(handleClick) {
+  const preTags = document.querySelectorAll("pre");
+  preTags.forEach((tag) => {
+    tag.addEventListener("click", handleClick);
+  });
+
+  return () => {
+    preTags.forEach((tag) => {
+      tag.removeEventListener("click", handleClick);
+    });
+  };
+}

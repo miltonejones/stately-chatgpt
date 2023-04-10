@@ -1,3 +1,4 @@
+import StackedMenuItem from './StackedMenuItem';
 import TimerProgress from './TimerProgress';
 import Photo from './Photo';
 import TextPopover from './TextPopover';
@@ -15,6 +16,7 @@ import IconTextField from './IconTextField';
 import Btn from './Btn';
 
 export {
+  StackedMenuItem,
   TimerProgress,
   Photo,
   TextPopover,
