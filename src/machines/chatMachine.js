@@ -294,7 +294,7 @@ const chatMachine = createMachine({
         icon: "EmojiObjects",
         value: 0.6,
         label: "Thoughtful",
-        caption: "More creativity, less precise verbose responses",
+        caption: "More creativity, less precise responses",
         color: "secondary"
        },
  
