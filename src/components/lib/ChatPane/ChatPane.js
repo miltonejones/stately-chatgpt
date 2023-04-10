@@ -460,9 +460,12 @@ const ChatPane = ({ handler }) => {
                           active={i === handler.temperatureIndex}
                           key={prop.value}
                         >
-                          <Nowrap hover bold={i === handler.temperatureIndex}>
-                            {prop.label}
-                          </Nowrap>
+                          <Flex spacing={1}>
+                            <TextIcon icon={prop.icon} />
+                            <Nowrap hover bold={i === handler.temperatureIndex}>
+                              {prop.label}
+                            </Nowrap>
+                          </Flex>
                           <Nowrap
                             hover
                             bold={i === handler.temperatureIndex}

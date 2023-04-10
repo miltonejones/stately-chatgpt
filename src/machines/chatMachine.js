@@ -284,12 +284,14 @@ const chatMachine = createMachine({
     tempProps: [
        {
         value: 0.1,
+        icon: "SquareFoot",
         label: "Precise",
         caption: "Little creativity, high confidence responses",
         color: "primary"
        },
 
        {
+        icon: "EmojiObjects",
         value: 0.6,
         label: "Thoughtful",
         caption: "More creativity, less precise verbose responses",
@@ -297,6 +299,7 @@ const chatMachine = createMachine({
        },
  
        {
+        icon: "Palette",
         value: 0.9,
         label: "Creative",
         caption: "Use this option when you're feeling lucky",
