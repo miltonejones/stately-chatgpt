@@ -186,7 +186,7 @@ const chatMachine = createMachine({
     },
     clearing: {
       invoke: {
-        src: "dropSession",
+        src: "dropSessions",
         onDone: [
           {
             target: "idle",
@@ -254,6 +254,11 @@ const chatMachine = createMachine({
     CLEAR: {
       target: ".clearing",
     },
+    DROP: {
+      target: ".persist",
+      actions: "dropSession",
+      description: "Drop selected session from user memory",
+    },
   },
   context: {
     sessions: {}, 
@@ -304,7 +309,7 @@ const chatMachine = createMachine({
 },
 {
   guards: {
-    isVocal: context => !!context.responseText?.length && !context.silent,
+    isVocal: context => !!context.responseText && !context.silent && context.responseType === 'text',
     isDefaultLang: context => context.lang_code === DEFAULT_LANG
 
   },
@@ -315,6 +320,15 @@ const chatMachine = createMachine({
         requestText: "show me a sample react function using the AWS SDK that saves a file to NoSQL using aws-amplify. use the currently logged in username as the file id"
       }
     }),
+    dropSession: assign((context, event) => {
+      const { sessions } = context;
+      delete sessions[event.question];
+      return {
+        sessions,
+        answers: []
+      }
+     
+    }),
     commitSession: assign((context, event) => {
       const { answers } = context;
       if  (answers.length) {
@@ -323,7 +337,7 @@ const chatMachine = createMachine({
           requestText: '',
           responseText: '',
           answers: [],
-          sessions: {
+          sessions: { 
             ...context.sessions,
             [question]: answers
           }
@@ -478,7 +492,7 @@ export const useChat = () => {
           contentType: 'application/json'
         }); 
       },
-      dropSession: async(context) => {
+      dropSessions: async(context) => {
         localStorage.removeItem('goat-chat');
         if (!context.user) return;
         const { userDataKey } = context.user;  
@@ -498,11 +512,12 @@ export const useChat = () => {
 
       loadTranslation: async(context) => {
         const { responseText, lang_code } = context; 
-        const [ code ] = lang_code.split('-');
+        const [ code ] = lang_code.split('-'); 
         return await translateText(code, removeBackslashStrings(responseText));
       },
       sendChatRequest: async(context) => {
-        const { requestText, responseType, answers, tempProps, temperatureIndex, start_index } = context;
+        const { requestText, responseType, answers, tempProps, 
+                temperatureIndex, start_index } = context;
         const { value } = tempProps[temperatureIndex];
         const create = q => ({"role": "user", "content": q.question});
         const size = isMobileViewPort ? 256 : 1024;
@@ -535,6 +550,11 @@ export const useChat = () => {
   return {
     state,
     send, 
+    diagnosticProps: {
+      ...chatMachine,
+      state,
+      send,
+    },
     isMobileViewPort,
     ...state.context
   };

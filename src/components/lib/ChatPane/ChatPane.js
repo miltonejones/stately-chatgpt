@@ -16,6 +16,7 @@ import {
   Nowrap,
   Btn,
   TextIcon,
+  ConfirmPop,
   IconTextField,
   TinyButton,
   TextPopover,
@@ -42,6 +43,8 @@ import EngineMenu from '../EngineMenu/EngineMenu';
 //     </pre>
 //   );
 // }
+
+const FOOTER_OFFSET = 40;
 
 const QuestionList = ({ handler, handleChange }) => {
   const disabled = !handler.state.matches('request.response');
@@ -95,7 +98,20 @@ const QuestionList = ({ handler, handleChange }) => {
             <Bar active>
               <Nowrap>{firstQuestion}</Nowrap>
               <TinyButton icon="BorderColor" />
-              <TinyButton icon="Close" onClick={() => handler.send('QUIT')} />
+
+              <ConfirmPop
+              
+              message="Are you are you want to remove this conversation?"
+              label="Confirm clear"
+              okayText="delete"
+              onChange={(ok) => !!ok && handler.send({
+                type: 'DROP',
+                question: firstQuestion
+              })}  
+              >
+
+              <TinyButton icon="Delete" />
+              </ConfirmPop>
             </Bar>
           )}
 
@@ -121,11 +137,17 @@ const QuestionList = ({ handler, handleChange }) => {
         {/* sidebar options menu */}
         <Stack>
           {/* clear conversations fires CLEAR event  */}
+          <ConfirmPop 
+              message="Are you are you want to clear all your conversations?"
+              label="Confirm clear"
+              okayText="Clear conversations"
+              onChange={(ok) => !!ok && handler.send('CLEAR')}
+            >
           <Bar>
             <TinyButton icon="Delete" />
             <Nowrap hover>Clear conversations</Nowrap>
           </Bar>
-
+          </ConfirmPop>
           {/* voice language settings */}
           <Bar>
             <TinyButton
@@ -197,7 +219,7 @@ const Layout = styled(Box)(({ theme }) => ({
 
 const Answers = styled(Box)(({ theme, empty }) => ({
   backgroundColor: theme.palette.grey[100],
-  height: `100%`,
+  height: `calc(100%)`,
   padding: theme.spacing(1),
   width: 'calc(80vw -  16px)',
   display: 'flex',
@@ -227,6 +249,25 @@ const Option = styled(Card)(({ theme, active, color }) => ({
   },
 }));
 
+const ChatWindow = styled((props) => <Columns {...props}  columns={props.small ? '1fr' : '20vw 1fr'}/>)(
+  ({ theme}) => ({
+    alignItems: 'flex-start', 
+    height: `calc(100vh - ${FOOTER_OFFSET}px)`,
+    backgroundColor: theme.palette.common.white
+  }))
+
+const Sidebar = styled(Box)(
+  ({ theme}) => ({
+    height: `calc(100vh - 12px - ${FOOTER_OFFSET}px)`,
+    backgroundColor: theme.palette.grey[100],
+    paddingTop: theme.spacing(1),
+  }));
+
+const Workspace = styled(Box)(({ theme }) => ({
+  height: `calc(100vh - 100px - ${FOOTER_OFFSET}px)`, 
+  overflow: 'auto' 
+}))
+
 const ChatPane = ({ handler }) => {
   const disabled = !handler.state.matches('request.response');
   const listening = handler.state.matches('listening');
@@ -252,7 +293,11 @@ const ChatPane = ({ handler }) => {
   };
 
   const regererate = (index) => {
-    handleChange('requestText', handler.answers[index].question);
+    const { question, responseType } = handler.answers[index];
+
+    !!responseType && handleChange('responseType', responseType);
+
+    handleChange('requestText', question);
     handleChange('editing', null);
     handler.send({
       type: 'TEXT',
@@ -262,20 +307,11 @@ const ChatPane = ({ handler }) => {
 
   return (
     <Layout>
-      <Columns
-        sx={{ alignItems: 'flex-start', height: '100vh' }}
-        columns={isMobileViewPort ? '1fr' : '20vw 1fr'}
-      >
+      <ChatWindow small={isMobileViewPort}>
         {!isMobileViewPort && (
-          <Box
-            sx={{
-              height: 'calc(100vh - 12px)',
-              backgroundColor: (theme) => theme.palette.grey[100],
-              pt: 1,
-            }}
-          >
+          <Sidebar>
             <QuestionList handleChange={handleChange} handler={handler} />
-          </Box>
+          </Sidebar>
         )}
 
         <Box>
@@ -374,7 +410,7 @@ const ChatPane = ({ handler }) => {
             </Flex>
           </form>
 
-          <Box sx={{ height: 'calc(100vh - 100px)', overflow: 'auto' }}>
+          <Workspace>
             {/* something to look at while the bot is thinking */}
             {handler.state.matches('request.query') && (
               <TimerProgress component={LinearProgress} limit={60} auto />
@@ -526,9 +562,9 @@ const ChatPane = ({ handler }) => {
                   ))}
               </Answers>
             }
-          </Box>
+          </Workspace>
         </Box>
-      </Columns>
+      </ChatWindow>
       <Drawer
         open={handler.sidebarOpen && isMobileViewPort}
         onClose={() => handleChange('sidebarOpen', false)}

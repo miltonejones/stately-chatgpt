@@ -3,6 +3,7 @@ import ChatPane from './components/lib/ChatPane/ChatPane';
 import { AuthContext,  useAuthenticator } from './machines';
 import { Amplify } from 'aws-amplify'; 
 import awsExports from './aws-exports'; 
+import AppFooter from './components/lib/AppFooter/AppFooter';
 import './App.css';
 
 Amplify.configure(awsExports);
@@ -18,6 +19,7 @@ function App() {
   return (
     <AuthContext.Provider value={{ authenticator }}> 
       <ChatPane handler={chat} /> 
+      <AppFooter small={chat.isMobileViewPort} />
     </AuthContext.Provider>
   );
 }

@@ -424,11 +424,17 @@ export const useAuthenticator = (onSign) => {
       value
     })
   }
+ 
 
   return {
     state,
     send, 
     setPhoto,
+    diagnosticProps: {
+      ...authenticatorMachine,
+      state,
+      send,
+    },
     ...state.context
   };
 }

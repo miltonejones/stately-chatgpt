@@ -1,3 +1,4 @@
+import Pill from './Pill';
 import StackedMenuItem from './StackedMenuItem';
 import TimerProgress from './TimerProgress';
 import Photo from './Photo';
@@ -16,6 +17,7 @@ import IconTextField from './IconTextField';
 import Btn from './Btn';
 
 export {
+  Pill,
   StackedMenuItem,
   TimerProgress,
   Photo,
