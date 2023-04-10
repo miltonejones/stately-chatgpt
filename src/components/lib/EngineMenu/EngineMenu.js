@@ -7,7 +7,7 @@ import { useMenu } from '../../../machines';
 
  
  
-const EngineMenu = ({ handler, children, full, ...props }) => {
+const EngineMenu = ({ handler, children, engine, full, ...props }) => {
   const menu = useMenu(value => {
     if (value === undefined) return;
 
@@ -33,21 +33,22 @@ const EngineMenu = ({ handler, children, full, ...props }) => {
         onClose={menu.handleClose()}
       >
         
-      <Nowrap muted bold sx={{ p: 2 }}>
+      {!engine && <Nowrap muted bold sx={{ p: 2 }}>
         Response mode
-      </Nowrap>
+      </Nowrap>}
      
-        {typeProps.map(item =>  <StackedMenuItem {...item} 
+        {!engine && typeProps.map(item =>  <StackedMenuItem {...item} 
           onClick={menu.handleClose(item.value)} 
           bold={handler.responseType === item.value} 
         >{item.label} 
       </StackedMenuItem>)}
 
-      {!!full && handler.responseType === 'text' && <Nowrap muted bold sx={{ p: 2 }}>
+
+      {((!!full && handler.responseType === 'text') || !!engine) && <Nowrap muted bold sx={{ p: 2 }}>
         Precision settings
       </Nowrap>}
      
-      {!!full && handler.responseType === 'text' && tempProps.map((item, i) =>  <StackedMenuItem {...item} 
+      {((!!full && handler.responseType === 'text') || !!engine) && tempProps.map((item, i) =>  <StackedMenuItem {...item} 
           onClick={menu.handleClose(i)} 
           bold={handler.temperatureIndex === i} 
         >{item.label} 

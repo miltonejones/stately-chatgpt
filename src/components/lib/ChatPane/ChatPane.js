@@ -226,7 +226,7 @@ const Answers = styled(Box)(({ theme, empty }) => ({
   flexDirection: 'column',
   alignItems: empty ? 'center' : 'flex-start',
   justifyContent: empty ? 'flex-start' : 'flex-start',
-  paddingTop: empty ? '5vh' : 0,
+  paddingTop: empty ? '2vh' : 0,
 
   [theme.breakpoints.down('md')]: {
     width: 'calc(100vw)',
@@ -281,8 +281,9 @@ const ChatPane = ({ handler }) => {
   //   code: CodeBlock,
   // };
 
-  const { isMobileViewPort, typeProps, responseType } = handler;
+  const { isMobileViewPort, tempProps, typeProps, temperatureIndex, responseType } = handler;
   const typeProp = typeProps.find(type => type.value === responseType)
+  const tempProp = tempProps[temperatureIndex]
 
   // const priorQuestions = Object.keys(handler.sessions);
   // const firstQuestion = !handler.answers.length
@@ -427,7 +428,7 @@ const ChatPane = ({ handler }) => {
             {
               <Answers empty={!handler.answers.length}>
                 {/* show home screen when no answers present */}
-                {handler.state.can('ASK') && !handler.answers.length && (
+                {!handler.state.matches('request.query') && !handler.answers.length && (
                   <>
                     <Stack sx={{ m: 3 }}>
                       <Nowrap variant="h4">
@@ -445,48 +446,96 @@ const ChatPane = ({ handler }) => {
                       </Nowrap>
                     </Stack>
 
-                    <Nowrap
-                      sx={{ m: (theme) => theme.spacing(3, 0, 1, 0) }}
-                      small
-                      muted
-                    >
-                      ChatGPT precision settings
-                    </Nowrap>
-                    <Stack
-                      direction={isMobileViewPort ? 'column' : 'row'}
-                      wrap="wrap"
-                      spacing={1}
-                    >
-                      {handler.tempProps.map((prop, i) => (
-                        <Option
-                          color={prop.color}
-                          onClick={(e) => responseType === 'text' && handleChange('temperatureIndex', i)}
-                          active={i === handler.temperatureIndex}
-                          key={prop.value}
-                          disabled={responseType !== 'text'}
-                        >
-                          <Flex spacing={1}>
-                            <TextIcon icon={prop.icon} />
-                            <Nowrap hover bold={i === handler.temperatureIndex}>
-                              {prop.label}
-                            </Nowrap>
-                          </Flex>
-                          <Nowrap
-                            hover
-                            bold={i === handler.temperatureIndex}
-                            small
-                            wrap
+                    <IconButton  
+                      onClick={() => handler.send('ASK')} 
+                      sx={{
+                        width: 100,
+                        height: 100,
+                        border: 2,
+                        m: 3,
+                        backgroundColor: theme => listening ? theme.palette.primary.dark : theme.palette.common.white,
+                        borderColor: listening ? 'primary' : 'divider'
+                      }}>
+
+                      <TextIcon
+                        sx={{
+                          color: !listening ? 'primary'  : 'white'
+                        }}
+                        icon={listening ? 'MicOff' : 'Mic'}  />
+
+                    </IconButton>
+
+                    {!isMobileViewPort && (
+             
+                    <>
+                    
+                      <Nowrap
+                        sx={{ m: (theme) => theme.spacing(3, 0, 1, 0) }}
+                        small
+                        muted
+                      >
+                        ChatGPT precision settings
+                      </Nowrap>
+
+
+                      <Stack
+                        direction={isMobileViewPort ? 'column' : 'row'}
+                        wrap="wrap"
+                        spacing={1}
+                        sx={{ mb: 2 }}
+                      >
+                        {handler.tempProps.map((prop, i) => (
+                          <Option
+                            color={prop.color}
+                            onClick={(e) => responseType === 'text' && handleChange('temperatureIndex', i)}
+                            active={i === handler.temperatureIndex}
+                            key={prop.value}
+                            disabled={responseType !== 'text'}
                           >
-                            {prop.caption}
-                          </Nowrap>
-                        </Option>
-                      ))}
-                    </Stack>
+                            <Flex spacing={1}>
+                              <TextIcon icon={prop.icon} />
+                              <Nowrap hover bold={i === handler.temperatureIndex}>
+                                {prop.label}
+                              </Nowrap>
+                            </Flex>
+                            <Nowrap
+                              hover
+                              bold={i === handler.temperatureIndex}
+                              small
+                              wrap
+                            >
+                              {prop.caption}
+                            </Nowrap>
+                          </Option>
+                        ))}
+                      </Stack> 
 
+                    </>
+         
+                    )}
 
-                    <Nowrap  sx={{mt: 3}} small muted>
-                      Response mode
-                    </Nowrap>
+                      <Nowrap  sx={{mt: 3}} small muted>
+                        Precision settings
+                      </Nowrap>
+
+                    {!!isMobileViewPort && (
+                      <>
+          
+                      <EngineMenu engine handler={handler}>
+                        <Card sx={{ p: 1 }}>
+                          <StackedMenuItem bold {...tempProp}>
+                            {tempProp.label}
+                          </StackedMenuItem>
+                        </Card>
+                        </EngineMenu>
+
+                        <Nowrap  sx={{mt: 3}} small muted>
+                        Response mode
+                      </Nowrap>
+                      
+                      </>
+                    )}
+
 
                     <EngineMenu handler={handler}>
                       <Card sx={{ p: 1 }}>

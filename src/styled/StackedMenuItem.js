@@ -6,15 +6,15 @@ import TextIcon from './TextIcon';
 
 const StackedMenuItem = ({ icon, caption, children, bold, ...props}) => {
   return <MenuItem {...props}>
-    <Flex>
+    <Flex wrap="wrap">
       {!!icon && <IconButton>
         <TextIcon icon={icon} />
       </IconButton>}
       <Stack>
         <Flex bold={bold}>{children}</Flex>
-        <Flex small muted>{caption}</Flex>
+        <Flex wrap="wrap" small muted>{caption}</Flex>
       </Stack>
-    </Flex>
+    </Flex> 
   </MenuItem>
 }
 
