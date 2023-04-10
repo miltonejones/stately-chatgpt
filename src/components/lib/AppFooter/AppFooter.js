@@ -1,5 +1,5 @@
 import React from 'react';
-import { Nowrap, Flex, TinyButton, TextIcon } from '../../../styled';
+import { Nowrap, Flex, TinyButton } from '../../../styled';
 import AboutModal from '../AboutModal/AboutModal';
 
 const AppFooter = ({ small }) => {
@@ -25,10 +25,12 @@ const AppFooter = ({ small }) => {
       </Nowrap>}
 
       <Flex spacing={1}>
-        <img src="/logo.png" style={{
-          width: 24,
-          height: 24
-        }} />
+        <img src="/logo.png" 
+          alt="logo"
+          style={{
+            width: 24,
+            height: 24
+          }} />
         <Nowrap hover small muted onClick={() => window.open(XSTATE_HOME)}>
           <b>GoatGPT</b>. An xstate web application
         </Nowrap>

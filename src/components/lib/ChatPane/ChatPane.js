@@ -225,7 +225,8 @@ const Answers = styled(Box)(({ theme, empty }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: empty ? 'center' : 'flex-start',
-  justifyContent: empty ? 'center' : 'flex-start',
+  justifyContent: empty ? 'flex-start' : 'flex-start',
+  paddingTop: empty ? '10vh' : 0,
 
   [theme.breakpoints.down('md')]: {
     width: 'calc(100vw -  16px)',
@@ -235,7 +236,7 @@ const Answers = styled(Box)(({ theme, empty }) => ({
 const Option = styled(Card)(({ theme, active, color }) => ({
   padding: theme.spacing(1),
   width: 200,
-  height: 100,
+  height: 80,
   cursor: 'pointer',
   color: theme.palette.common.white,
   backgroundColor: active
@@ -352,7 +353,7 @@ const ChatPane = ({ handler }) => {
                 disabled={busy}
                 googlish
                 startIcon={
-                  <EngineMenu handler={handler}>
+                  <EngineMenu full handler={handler}>
                     <IconButton>
                       <TextIcon
                         icon={

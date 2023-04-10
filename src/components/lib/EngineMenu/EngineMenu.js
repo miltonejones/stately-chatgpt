@@ -1,21 +1,26 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import {
-  FlexMenu, StackedMenuItem
+  FlexMenu, StackedMenuItem, Nowrap
 } from '../../../styled';
 import { useMenu } from '../../../machines';
 
  
  
-const EngineMenu = ({ handler, children, ...props }) => {
-  const menu = useMenu(value => !!value && 
-      handler.send({ 
-        type: 'CHANGE',
-        key: 'responseType',
-        value
-      }));
+const EngineMenu = ({ handler, children, full, ...props }) => {
+  const menu = useMenu(value => {
+    if (value === undefined) return;
 
-      const { typeProps } = handler;
+    const key = isNaN(value) ? "responseType" : "temperatureIndex";    
+    handler.send({ 
+      type: 'CHANGE',
+      key,
+      value
+    });
+
+  });
+
+      const { typeProps, tempProps } = handler;
 
   
  return (
@@ -28,12 +33,24 @@ const EngineMenu = ({ handler, children, ...props }) => {
         onClose={menu.handleClose()}
       >
         
+      <Nowrap muted bold sx={{ p: 2 }}>
+        Response mode
+      </Nowrap>
+     
         {typeProps.map(item =>  <StackedMenuItem {...item} 
           onClick={menu.handleClose(item.value)} 
           bold={handler.responseType === item.value} 
-        >{item.label}
+        >{item.label} 
+      </StackedMenuItem>)}
 
-
+      {!!full && <Nowrap muted bold sx={{ p: 2 }}>
+        Precision settings
+      </Nowrap>}
+     
+      {!!full && tempProps.map((item, i) =>  <StackedMenuItem {...item} 
+          onClick={menu.handleClose(i)} 
+          bold={handler.temperatureIndex === i} 
+        >{item.label} 
       </StackedMenuItem>)}
      
      

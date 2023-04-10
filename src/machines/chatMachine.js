@@ -31,7 +31,7 @@ const chatMachine = createMachine({
     
     idle: {
       description: "Machine waits in idle request accepting no requests",
-      entry: "resetSession",
+      entry:["reloadChanges", "resetSession"],
       initial: "loading",
       states: {
         loading: {
@@ -369,9 +369,22 @@ const chatMachine = createMachine({
         sessions: event.data
       } 
     }),
-    applyChanges: assign((_, event) => {
+    reloadChanges: assign(() => {
+      const props = localStorage.getItem('goat-props');
+      if (props) {
+        return JSON.parse(props);
+      }
+    }),
+    applyChanges: assign((context, event) => {
+      const { props: old } = context;
+      const props =  {
+          ...old,
+          [event.key]: event.value,
+        }
+      localStorage.setItem('goat-props', JSON.stringify(props));
       return {
-        [event.key]: event.value
+        [event.key]: event.value,
+        props
       } 
     }),
     

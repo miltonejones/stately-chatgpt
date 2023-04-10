@@ -6,6 +6,7 @@ import Flex from './Flex';
 import Spacer from './Spacer';
 import Nowrap from './Nowrap';
 import TinyButton from './TinyButton';
+import FlexMenu from './FlexMenu';
 import Btn from './Btn';
 
 
@@ -37,7 +38,7 @@ const TextPopover = ({
         {children}
       </Box>
       
-      <Popover
+      <FlexMenu component={Popover}
         anchorEl={menu.anchorEl}
         onClose={error ? () => menu.send('ok') : menu.handleClose()}
         open={Boolean(menu.anchorEl)}
@@ -128,7 +129,7 @@ const TextPopover = ({
             </Collapse>
           </Flex>
         </Stack>
-      </Popover>
+      </FlexMenu>
     </>
   );
 };
