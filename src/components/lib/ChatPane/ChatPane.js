@@ -233,20 +233,24 @@ const Answers = styled(Box)(({ theme, empty }) => ({
   },
 }));
 
-const Option = styled(Card)(({ theme, active, color }) => ({
+const Option = styled(Card)(({ theme, active, color, disabled }) => ({
   padding: theme.spacing(1),
   width: 200,
   height: 80,
-  cursor: 'pointer',
+  cursor: disabled ? "default" : 'pointer',
   color: theme.palette.common.white,
-  backgroundColor: active
+  backgroundColor: disabled 
+    ? theme.palette.grey[400] 
+    : active
     ? theme.palette[color].dark
     : theme.palette[color].light,
   outlineOffset: 1,
-  outline: active ? `solid 2px ${theme.palette[color].dark}` : 'none',
+  outline: disabled ? theme.palette.grey[400] : active ? `solid 2px ${theme.palette[color].dark}` : 'none',
   '&:hover': {
-    outline: `solid 2px ${theme.palette[color].dark}`,
-    backgroundColor: theme.palette[color].dark,
+    outline: disabled ? theme.palette.grey[400] : `solid 2px ${theme.palette[color].dark}`,
+    backgroundColor: disabled 
+        ? theme.palette.grey[400] 
+        : theme.palette[color].dark,
   },
 }));
 
@@ -456,9 +460,10 @@ const ChatPane = ({ handler }) => {
                       {handler.tempProps.map((prop, i) => (
                         <Option
                           color={prop.color}
-                          onClick={(e) => handleChange('temperatureIndex', i)}
+                          onClick={(e) => responseType === 'text' && handleChange('temperatureIndex', i)}
                           active={i === handler.temperatureIndex}
                           key={prop.value}
+                          disabled={responseType !== 'text'}
                         >
                           <Flex spacing={1}>
                             <TextIcon icon={prop.icon} />

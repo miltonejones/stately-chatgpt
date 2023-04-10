@@ -43,11 +43,11 @@ const EngineMenu = ({ handler, children, full, ...props }) => {
         >{item.label} 
       </StackedMenuItem>)}
 
-      {!!full && <Nowrap muted bold sx={{ p: 2 }}>
+      {!!full && handler.responseType === 'text' && <Nowrap muted bold sx={{ p: 2 }}>
         Precision settings
       </Nowrap>}
      
-      {!!full && tempProps.map((item, i) =>  <StackedMenuItem {...item} 
+      {!!full && handler.responseType === 'text' && tempProps.map((item, i) =>  <StackedMenuItem {...item} 
           onClick={menu.handleClose(i)} 
           bold={handler.temperatureIndex === i} 
         >{item.label} 
