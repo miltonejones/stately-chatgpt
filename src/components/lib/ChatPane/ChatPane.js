@@ -226,7 +226,7 @@ const Answers = styled(Box)(({ theme, empty }) => ({
   flexDirection: 'column',
   alignItems: empty ? 'center' : 'flex-start',
   justifyContent: empty ? 'flex-start' : 'flex-start',
-  paddingTop: empty ? '10vh' : 0,
+  paddingTop: empty ? '5vh' : 0,
 
   [theme.breakpoints.down('md')]: {
     width: 'calc(100vw)',
