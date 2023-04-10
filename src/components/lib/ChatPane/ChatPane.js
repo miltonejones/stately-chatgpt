@@ -137,7 +137,7 @@ const QuestionList = ({ handler, handleChange }) => {
         {/* sidebar options menu */}
         <Stack>
           {/* clear conversations fires CLEAR event  */}
-          <ConfirmPop 
+          {!!priorQuestions.length && <ConfirmPop 
               message="Are you are you want to clear all your conversations?"
               label="Confirm clear"
               okayText="Clear conversations"
@@ -147,7 +147,7 @@ const QuestionList = ({ handler, handleChange }) => {
             <TinyButton icon="Delete" />
             <Nowrap hover>Clear conversations</Nowrap>
           </Bar>
-          </ConfirmPop>
+          </ConfirmPop>}
           {/* voice language settings */}
           <Bar>
             <TinyButton
@@ -446,13 +446,17 @@ const ChatPane = ({ handler }) => {
                       </Nowrap>
                     </Stack>
 
+                    <Stack sx={{ m: 3}}>
+                    <Nowrap error={listening} bold small muted>
+                      {listening ? "I'm listening..." : "Ask me anything"}
+                    </Nowrap>
                     <IconButton  
                       onClick={() => handler.send('ASK')} 
                       sx={{
                         width: 100,
                         height: 100,
                         border: 2,
-                        m: 3,
+                     
                         backgroundColor: theme => listening ? theme.palette.primary.dark : theme.palette.common.white,
                         borderColor: listening ? 'primary' : 'divider'
                       }}>
@@ -464,6 +468,7 @@ const ChatPane = ({ handler }) => {
                         icon={listening ? 'MicOff' : 'Mic'}  />
 
                     </IconButton>
+                    </Stack>
 
                     {!isMobileViewPort && (
              

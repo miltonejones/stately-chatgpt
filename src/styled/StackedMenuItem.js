@@ -4,8 +4,15 @@ import { MenuItem, Stack, IconButton } from '@mui/material';
 import Flex from './Flex';
 import TextIcon from './TextIcon';
 
-const StackedMenuItem = ({ icon, caption, children, bold, ...props}) => {
-  return <MenuItem {...props}>
+const StackedMenuItem = ({ 
+    icon, 
+    caption, 
+    children, 
+    bold, 
+    ...props
+  }) => {
+  return (
+  <MenuItem {...props}>
     <Flex>
       {!!icon && <IconButton>
         <TextIcon icon={icon} />
@@ -16,6 +23,7 @@ const StackedMenuItem = ({ icon, caption, children, bold, ...props}) => {
       </Stack>
     </Flex> 
   </MenuItem>
+  )
 }
 
 export default StackedMenuItem;

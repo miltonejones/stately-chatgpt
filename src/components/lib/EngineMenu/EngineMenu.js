@@ -6,7 +6,12 @@ import {
 import { useMenu } from '../../../machines';
 
  
- 
+ /**
+  * Allows users to select a response mode and precision setting for an engine. It uses the useMenu hook to create a menu that 
+  * opens when the user clicks on the menu and displays options that can be selected. It also has a handler that sends a change 
+  * event with the key and value of the selected item. The user can choose from multiple options for response mode and precision 
+  * settings. Once the user has selected their desired option, the EngineMenu will close. 
+  */
 const EngineMenu = ({ handler, children, engine, full, ...props }) => {
   const menu = useMenu(value => {
     if (value === undefined) return;

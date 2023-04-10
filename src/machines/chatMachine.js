@@ -513,7 +513,9 @@ export const useChat = () => {
         if (!context.user) return;
         const { userDataKey } = context.user;  
         const filename = `${userDataKey}.json`; 
-        await Storage.remove(filename); 
+        await Storage.put(filename, "{}", {
+          contentType: 'application/json'
+        }); 
       },
       startListening: async() => {
         return recognition.start();
