@@ -229,7 +229,7 @@ const Answers = styled(Box)(({ theme, empty }) => ({
   paddingTop: empty ? '10vh' : 0,
 
   [theme.breakpoints.down('md')]: {
-    width: 'calc(100vw -  16px)',
+    width: 'calc(100vw)',
   },
 }));
 
@@ -346,6 +346,8 @@ const ChatPane = ({ handler }) => {
                 helperText={
                   handler.state.matches('speak')
                     ? 'Translating...'
+                    : handler.responseType === 'image'
+                    ? "Auto-generate an image by describing it"
                     : isMobileViewPort
                     ? 'ChatGPT may produce inaccurate information'
                     : 'ChatGPT may produce inaccurate information about people, places, or facts'
