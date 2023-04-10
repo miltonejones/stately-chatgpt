@@ -420,7 +420,7 @@ const ChatPane = ({ handler }) => {
             {
               <Answers empty={!handler.answers.length}>
                 {/* show home screen when no answers present */}
-                {!handler.answers.length && (
+                {handler.state.can('ASK') && !handler.answers.length && (
                   <>
                     <Stack sx={{ m: 3 }}>
                       <Nowrap variant="h4">
