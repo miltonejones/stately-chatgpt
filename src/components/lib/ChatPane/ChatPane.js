@@ -721,15 +721,14 @@ const ChatPane = ({ handler }) => {
                     {/* answer text  */}
                       <ReactMarkdown key={i}>{response.answer}</ReactMarkdown>
 
-                      {response.finish_reason === 'length' && <Alert sx={{ m: 1 }} severity="warning">
-{/*                         
-                        <TextIcon color="error" icon="Error" /> */}
-                        <Nowrap hover 
-                          onClick={() => regererate(i)}
-                          bold
-                          small error>Response is incomplete. Allocate more tokens and try again</Nowrap> 
-                        </Alert>}
- 
+                      {response.finish_reason === 'length' && <Alert sx={{ m: 1, width: '98%' }} severity="warning">
+                          <Stack> 
+                            <Nowrap hover onClick={() => regererate(i)}
+                              bold small error>Response is incomplete. </Nowrap> 
+                            <Nowrap small muted>Allocate more tokens and try again</Nowrap>
+                          </Stack>
+                        </Alert> 
+                        } 
                     </>
                   ))}
               </Answers>
