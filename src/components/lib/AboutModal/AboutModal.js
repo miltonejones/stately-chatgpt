@@ -19,6 +19,14 @@ const Panel = styled(Box)({
 
 const capitalize = (str) => str.replace(/_/g, ' ');
 
+
+/**
+Renders a state machine representation recursively, based on the given state object.
+@param {Object} state - The state object to be rendered
+@param {boolean} root - Indicates if the state machine is the root state
+@param {number} offset - The indentation offset used to display the state tree
+@returns {JSX.Element} The state machine representation
+*/
 const StateTree = ({ state, root, offset = 0 }) => {
   const stateKeys = state.states;
   const eventKeys = !state.on ? [] : Object.keys(state.on);

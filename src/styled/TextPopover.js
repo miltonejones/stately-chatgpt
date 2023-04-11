@@ -9,7 +9,19 @@ import TinyButton from './TinyButton';
 import FlexMenu from './FlexMenu';
 import Btn from './Btn';
 
-
+/**
+ * A component that renders a text input inside a pop-up menu.
+ *
+ * @param {Object} props - The props object for the component.
+ * @param {ReactNode} props.children - The children to render inside the component.
+ * @param {string} props.value - The current value of the text input.
+ * @param {Array<Object>} props.options - An array of objects representing the options for the text input.
+ * @param {string} props.description - A description of the text input.
+ * @param {function} props.onChange - A function to be called when the value of the text input changes.
+ * @param {string} props.okayText - The text to display in the "okay" button.
+ * @param {string} props.icon - The name of the icon to display next to the text input.
+ * @returns {ReactNode} The component UI.
+ */
 const TextPopover = ({ 
   children,
   value,

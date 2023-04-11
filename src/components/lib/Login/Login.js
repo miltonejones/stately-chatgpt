@@ -18,6 +18,13 @@ import {
 
 
 
+/**
+ * A component that renders an error message with a stack trace and options for handling
+ * the error (e.g., retrying login, canceling, or signing up for a new account).
+ * @param {Object} props - The component props.
+ * @param {Object} props.handler - The authentication handler object.
+ * @returns {JSX.Element} An error message with options for handling the error.
+ */
 const LoginError = ({ handler }) => {
   const { error, stack } = handler;
   const events = handler.state.nextEvents.filter((f) => f !== 'CHANGE');
@@ -38,6 +45,16 @@ const LoginError = ({ handler }) => {
   );
 };
 
+
+
+/**
+ * A form for user login that renders input fields for email and password, as well as
+ * buttons for submitting the form, forgot password, and signing up for a new account.
+ * @param {Object} props - The component props.
+ * @param {Object} props.handler - The authentication handler object.
+ * @param {Function} props.onClose - A function to handle closing the form.
+ * @returns {JSX.Element} A form for user login that renders input fields and buttons.
+ */
 const LoginForm = ({ handler, onClose }) => {
   const fields = handler.state.meta;
   const [key] = Object.keys(fields);
@@ -109,6 +126,13 @@ const LoginForm = ({ handler, onClose }) => {
   );
 };
 
+
+/**
+ * A component that handles user authentication and displays login/logout options.
+ * @param {Object} props - The component props.
+ * @param {React.ReactNode} [props.children] - The child component(s) to render.
+ * @returns {JSX.Element} A component that handles user authentication and displays login/logout options.
+ */
 const Login = ({ children, ...props }) => {
   const { authenticator } = React.useContext(AuthContext);
   const menu = useMenu();

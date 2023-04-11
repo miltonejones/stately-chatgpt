@@ -9,6 +9,18 @@ import TinyButton from './TinyButton';
 import FlexMenu from './FlexMenu';
 import Btn from './Btn';
 
+/**
+
+A component that renders a confirm dialog when the user clicks on its children.
+@param {Object} props - The component props.
+@param {ReactNode} props.children - The children to be rendered as the trigger for the dialog.
+@param {Function} props.onChange - The function to be called when the user confirms or cancels the action.
+@param {string} [props.caption] - The caption text to be displayed in the dialog.
+@param {string} [props.message="Are you sure you want to delete this item?"] - The message to be displayed in the dialog.
+@param {string} [props.label="Are you sure?"] - The label text to be displayed in the dialog header.
+@param {string} [props.okayText="Okay"] - The text to be displayed in the confirm button.
+@returns {JSX.Element} - The ConfirmPop component.
+*/
 const ConfirmPop =  ({ 
     children, 
     onChange, 

@@ -1,10 +1,9 @@
 import React from 'react';
-import { Box } from '@mui/material';
+import { Slider, Stack, Box } from '@mui/material';
 import {
   FlexMenu, StackedMenuItem, Nowrap
 } from '../../../styled';
 import { useMenu } from '../../../machines';
-
  
  /**
   * Allows users to select a response mode and precision setting for an engine. It uses the useMenu hook to create a menu that 
@@ -24,8 +23,19 @@ const EngineMenu = ({ handler, children, engine, full, ...props }) => {
     });
 
   });
-
+  const handleChange = (_, value) => {
+    handler.send({ 
+      type: 'CHANGE',
+      key: 'max_tokens',
+      value
+    });
+  }
       const { typeProps, tempProps } = handler;
+
+    const ticks = [7,8,9,10,11].map(tick => ({
+      value: tick,
+      label: Math.pow(2, tick)
+    }))
 
   
  return (
@@ -59,6 +69,27 @@ const EngineMenu = ({ handler, children, engine, full, ...props }) => {
         >{item.label} 
       </StackedMenuItem>)}
      
+     
+   
+     
+      {((!!full && handler.responseType === 'text') || !!engine) && <Stack sx={{ p: 2 }}>
+      <Nowrap muted bold>
+        Token size 
+      </Nowrap>
+      <Nowrap muted small>
+       More tokens is slower but allows longer answers
+      </Nowrap>
+      <Slider
+        sx={{ m: 2, maxWidth: '90%' }}
+        value={handler.max_tokens}
+        min={7}
+        max={11}
+        step={null}
+        marks={ticks}
+        onChange={handleChange}
+        aria-labelledby="double-value-slider"
+      />
+      </Stack>}
      
       </FlexMenu>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   styled,
+  Alert,
   Box,
   CircularProgress,
   LinearProgress,
@@ -28,30 +29,38 @@ import ReactMarkdown from 'react-markdown';
 import Login from '../Login/Login';
 import ProfilePhotoForm from '../ProfilePhotoForm/ProfilePhotoForm';
 import EngineMenu from '../EngineMenu/EngineMenu';
-
-// import rehypeHighlight from 'rehype-highlight';
-// import Prism from 'prismjs';
-// import 'prismjs/themes/prism-tomorrow.css';
-
-// function CodeBlock({ language, value }) {
-//   // const prismLanguage = Prism.languages[language];
-//   // const highlightedCode = Prism.highlight(value, prismLanguage, language);
-
-//   return (
-//     <pre>
-//      {value}
-//     </pre>
-//   );
-// }
+import { AuthContext } from '../../../machines';
+ 
 
 const FOOTER_OFFSET = 40;
 
+/** 
+The QuestionList renders a list of past questions and provides options for configuring the chat interface. 
+The component receives two props, handler and handleChange, and is defined as a function that returns JSX.
+
+The handler prop is an object that contains information about the state of the chat interface, while the handleChange prop is a function that 
+is used to update the state of the component. The handler object has several properties that are used to render the component, including state, answers, 
+sessions, demoLanguages, lang_code, and silent.
+
+Inside the component function, several variables are defined using destructuring and the React.useContext hook to access the AuthContext. 
+The disabled variable is set to true if the chat interface is not in a state that allows for a new response. The currentLang variable is set to the current 
+language being used for spoken responses.
+
+The component renders a header with a title and a button for starting a new chat. It then renders a list of past questions using the priorQuestions variable, 
+and provides the option to clear individual conversations. The component also provides a sidebar menu with options for clearing all conversations, 
+changing the language used for spoken responses, and logging in/out of the chat interface.
+
+The QuestionList component is a complex component that relies on several internal variables and external state. Its purpose is to provide a user 
+interface for interacting with a chatbot and managing past conversations.
+ */
 const QuestionList = ({ handler, handleChange }) => {
   const disabled = !handler.state.matches('request.response');
+  const { authenticator } = React.useContext(AuthContext);
   const { demoLanguages, lang_code } = handler;
   const currentLang = Object.keys(demoLanguages).find(
     (lang) => demoLanguages[lang] === lang_code
   );
+  
   // const renderers = {
   //   code: CodeBlock,
   // };
@@ -63,7 +72,7 @@ const QuestionList = ({ handler, handleChange }) => {
 
   return (
     <>
-      <Flex sx={{ p: (theme) => theme.spacing(2, 1) }}>
+      <Flex sx={{ m: (theme) => theme.spacing(2, 1) }}>
         <Badge badgeContent="+" color="warning">
           <Nowrap variant="h6" bold>
             GoatGPT
@@ -80,7 +89,7 @@ const QuestionList = ({ handler, handleChange }) => {
           new chat
         </Btn>
       </Flex>
-
+{/* [{authenticator.user?.attributes.locale}] */}
       <Box
         sx={{
           p: (theme) => theme.spacing(0, 1),
@@ -166,7 +175,10 @@ const QuestionList = ({ handler, handleChange }) => {
               name="lang_code"
               description="Select a language for spoken responses"
               label="Choose language"
-              onChange={(e) => handleChange('lang_code', e.target.value)}
+              onChange={(e) => {
+                handleChange('lang_code', e.target.value)
+                authenticator.setLocale(e.target.value);
+              }}
               value={handler.lang_code}
               options={Object.keys(handler.demoLanguages).map((label) => ({
                 value: handler.demoLanguages[label],
@@ -190,6 +202,18 @@ const QuestionList = ({ handler, handleChange }) => {
   );
 };
 
+/**
+A styled component that renders a Flex component with additional styling.
+@component
+@param {Object} props - The props object.
+@param {boolean} [props.active] - Determines if the component is active.
+@param {number} [props.spacing=1] - The spacing between child elements.
+@returns {JSX.Element} - A Flex component with additional styling.
+@example
+<Bar active spacing={2}>
+<ChildComponent />
+</Bar>
+/ const Bar = styled((props) => <Flex {...props} spacing={1} />)( */
 const Bar = styled((props) => <Flex {...props} spacing={1} />)(
   ({ theme, active }) => ({
     margin: theme.spacing(0.5, 0),
@@ -206,6 +230,11 @@ const Bar = styled((props) => <Flex {...props} spacing={1} />)(
   })
 );
 
+/**
+A styled component for rendering a question with specific typography styling.
+@param {Object} props - The props object for the component.
+@returns {JSX.Element} - The question component.
+*/
 const Question = styled('p')(({ theme }) => ({
   fontSize: '0.9rem',
   padding: 0,
@@ -213,10 +242,27 @@ const Question = styled('p')(({ theme }) => ({
   fontWeight: 600,
 }));
 
+/** 
+A styled component for rendering a layout with no margin.
+@param {Object} props - The props object for the component.
+@returns {JSX.Element} - The layout component.
+*/
 const Layout = styled(Box)(({ theme }) => ({
   margin: theme.spacing(0),
 }));
 
+
+/**
+A styled component for displaying answers.
+@param {Object} props - The props object.
+@param {Object} props.theme - The theme object.
+@param {boolean} props.empty - A boolean indicating whether the Answers component is empty or not.
+@returns {JSX.Element} - A React JSX element representing the Answers component.
+@example
+<Answers theme={theme} empty={true}>
+// Add child components here
+</Answers>
+*/
 const Answers = styled(Box)(({ theme, empty }) => ({
   backgroundColor: theme.palette.grey[100],
   height: `calc(100%)`,
@@ -233,6 +279,14 @@ const Answers = styled(Box)(({ theme, empty }) => ({
   },
 }));
 
+/**
+A styled component for rendering an option in a selection list.
+@param {Object} props - The props object for the component.
+@param {boolean} props.active - Determines if the option is currently active or not.
+@param {string} props.color - The color of the option.
+@param {boolean} props.disabled - Determines if the option is currently disabled or not.
+@returns {JSX.Element} - The option component.
+*/
 const Option = styled(Card)(({ theme, active, color, disabled }) => ({
   padding: theme.spacing(1),
   width: 200,
@@ -254,6 +308,12 @@ const Option = styled(Card)(({ theme, active, color, disabled }) => ({
   },
 }));
 
+/**
+A styled component for rendering a chat window with adjustable column widths.
+@param {Object} props - The props object for the component.
+@param {boolean} props.small - Determines if the chat window should have a single column or multiple columns.
+@returns {JSX.Element} - The chat window component.
+*/
 const ChatWindow = styled((props) => <Columns {...props}  columns={props.small ? '1fr' : '20vw 1fr'}/>)(
   ({ theme}) => ({
     alignItems: 'flex-start', 
@@ -261,34 +321,61 @@ const ChatWindow = styled((props) => <Columns {...props}  columns={props.small ?
     backgroundColor: theme.palette.common.white
   }))
 
+/**
+A styled component for rendering a sidebar with a specific height, background color, and padding.
+@param {Object} props - The props object for the component.
+@returns {JSX.Element} - The sidebar component.
+*/
 const Sidebar = styled(Box)(
   ({ theme}) => ({
     height: `calc(100vh - 12px - ${FOOTER_OFFSET}px)`,
     backgroundColor: theme.palette.grey[100],
     paddingTop: theme.spacing(1),
   }));
+ 
 
+/**
+ * A styled component that renders a workspace element.
+ *
+ * @constant
+ * @type {import('@material-ui/core').StyledComponentProps<'div'>}
+ *
+ * @param {Object} props - The props object.
+ * @param {Object} props.theme - The theme object containing style-related properties.
+ * @returns {Object} An object containing the styles for the Workspace component.
+ */
 const Workspace = styled(Box)(({ theme }) => ({
-  height: `calc(100vh - 100px - ${FOOTER_OFFSET}px)`, 
-  overflow: 'auto' 
-}))
+  height: `calc(100vh - 100px - ${FOOTER_OFFSET}px)`,
+  overflow: 'auto'
+}));
 
+
+/**
+This code defines a React functional component ChatPane that renders a chat window where users can interact with a GPT-based chatbot. 
+The component receives a single prop handler, which is an object containing the current state of the chatbot and functions to interact with it.
+
+The component consists of a Layout styled component, a ChatWindow component with two children: a Sidebar (optional) and a Box with the main chat 
+interface. The Sidebar component contains a QuestionList component that displays a list of previous questions and allows the user to clear the chat 
+history or select a different voice language.
+
+The main chat interface is composed of a form with an IconTextField component and a ProfilePhotoForm component for the user's profile photo. 
+The IconTextField has an input field for the user to type or speak their question, a dropdown menu to select the response type (text or image), 
+and a button to send the question or start/stop speech recognition. The Box component also contains a Workspace component that displays the chatbot's responses.
+
+The Workspace component has two states: the initial state when no responses have been received, and the state when the chatbot has provided a 
+response. In the initial state, the component displays a welcome message with options to select the response type and the chatbot's precision settings. 
+When the chatbot has provided a response, the component displays the user's question, the chatbot's response, and buttons to edit or regenerate the response.
+
+The component also contains helper functions to handle changes in the component's state and regenerate responses to previous questions.
+ */
 const ChatPane = ({ handler }) => {
   const disabled = !handler.state.matches('request.response');
   const listening = handler.state.matches('listening');
-  const busy = handler.state.matches('request.query');
-  // const renderers = {
-  //   code: CodeBlock,
-  // };
+  const busy = handler.state.matches('request.query'); 
 
   const { isMobileViewPort, tempProps, typeProps, temperatureIndex, responseType } = handler;
   const typeProp = typeProps.find(type => type.value === responseType)
-  const tempProp = tempProps[temperatureIndex]
-
-  // const priorQuestions = Object.keys(handler.sessions);
-  // const firstQuestion = !handler.answers.length
-  //   ? null
-  //   : handler.answers[handler.answers.length - 1].question;
+  const tempProp = tempProps[temperatureIndex];
 
   const handleChange = (key, value) => {
     handler.send({
@@ -310,6 +397,8 @@ const ChatPane = ({ handler }) => {
       index,
     });
   };
+
+  const timerLimit = Math.pow (handler.max_tokens - 6, 3)
 
   return (
     <Layout>
@@ -421,7 +510,7 @@ const ChatPane = ({ handler }) => {
           <Workspace>
             {/* something to look at while the bot is thinking */}
             {handler.state.matches('request.query') && (
-              <TimerProgress component={LinearProgress} limit={60} auto />
+              <TimerProgress component={LinearProgress} limit={timerLimit} auto />
             )}
 
             {/* MAIN WORKSPACE */}
@@ -559,6 +648,8 @@ const ChatPane = ({ handler }) => {
                 {!!handler.answers.length &&
                   handler.answers.map((response, i) => (
                     <>
+
+                    {/* question text  */}
                       <Flex
                         wrap="wrap"
                         spacing={1}
@@ -568,8 +659,10 @@ const ChatPane = ({ handler }) => {
                           width: '100%',
                         }}
                       >
+
+
                         <Question wrap small>
-                          {/* [{response.id}] */}
+                      
                           {response.id !== handler.editing ? (
                             <>{response.question}</>
                           ) : (
@@ -600,12 +693,15 @@ const ChatPane = ({ handler }) => {
                             />
                           )}
                         </Question>
+
+
                         <Spacer />
-                        {!isNaN(response.responseTime) && (
+                        {/* {!isNaN(response.responseTime) && (
                           <Nowrap tiny muted>
                             {response.responseTime / 1000}s
                           </Nowrap>
-                        )}
+                        )} */}
+                        <TinyButton icon="CopyAll" onClick={() => handler.clipboard.copy(response.answer)} />
                         <TinyButton icon="Sync" onClick={() => regererate(i)} />
                         <TinyButton
                           icon={
@@ -622,11 +718,22 @@ const ChatPane = ({ handler }) => {
                         />
                       </Flex>
 
+                    {/* answer text  */}
                       <ReactMarkdown key={i}>{response.answer}</ReactMarkdown>
+
+                      {response.finish_reason === 'length' && <Alert sx={{ m: 1 }} severity="warning">
+{/*                         
+                        <TextIcon color="error" icon="Error" /> */}
+                        <Nowrap hover 
+                          onClick={() => regererate(i)}
+                          bold
+                          small error>Response is incomplete. Allocate more tokens and try again</Nowrap> 
+                        </Alert>}
+ 
                     </>
                   ))}
               </Answers>
-            }
+            } 
           </Workspace>
         </Box>
       </ChatWindow>

@@ -46,20 +46,19 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
+ 
 
-// const options = [
-//   'Google Search',
-//   'I am feeling lucky',
-//   'Google Doodles',
-//   'Google Images',
-//   'Google News',
-//   'Google Books',
-//   'Google Maps',
-//   'Google Drive',
-//   'Google Translate',
-//   'Google Shopping',
-// ];
-
+/**
+SearchBox component for autocomplete search input
+@param {Object} props - Component props
+@param {string[]} props.options - Array of strings to populate autocomplete options
+@param {string} props.label - Label for the search input
+@param {string} props.value - Value of the search input
+@param {string} props.name - Name of the search input
+@param {function} props.onUserSelect - Function to handle user selection from the autocomplete options
+@param {function} props.onChange - Function to handle changes to the search input value
+@returns {JSX.Element} - Rendered component
+*/
 export default function SearchBox({ options = [], ...props}) {
   const classes = useStyles();
   const handleChange = value => {

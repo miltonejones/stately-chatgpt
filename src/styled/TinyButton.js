@@ -2,8 +2,7 @@
 import React from 'react';
 import * as Icons from "@mui/icons-material";
 import RotateButton from './RotateButton';
-
-// const Icons = React.lazy(() => import('./icons'));
+ 
 
 const TinyButton = ({ icon , ...props}) => {
   const Icon = Icons[icon] || Icons.Error;

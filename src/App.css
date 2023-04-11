@@ -1,16 +1,21 @@
+/* Sets the text alignment for the entire application to left. */
 .App {
   text-align: left;
 }
-*{
+
+/* Sets the box-sizing property for all elements to border-box to include padding and border in the total width and height. */
+* {
   box-sizing: border-box;
- } 
- 
+}
+
+/* Styles the pre tag to have a white background and padding of 16 pixels. */
 pre {
   background-color: white;
   position: relative;
   padding: 16px;
 }
 
+/* Adds a "Copy" button to the top right corner of the pre tag. */
 pre::before {
   content: "📋 Copy";
   position: absolute;
@@ -22,6 +27,7 @@ pre::before {
   opacity: 0.3;
 }
 
+/* Sets the margin for the body element to 0, hides the overflow, and sets the background color to #ebebeb. */
 body {
   margin: 0;
   overflow: hidden;

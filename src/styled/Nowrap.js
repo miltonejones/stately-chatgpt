@@ -2,6 +2,26 @@
 import { styled, Typography } from '@mui/material';
 //  import { blue } from '@mui/material/colors';
 
+
+/**
+ * A typography component with optional text truncation and text wrap.
+ * @param {object} props - The component props.
+ * @param {boolean} [props.selected] - Whether the component is currently selected.
+ * @param {string} [props.color] - The color of the component.
+ * @param {boolean} [props.error] - Whether the component represents an error.
+ * @param {string} [props.width] - The width of the component.
+ * @param {boolean} [props.wrap=true] - Whether to wrap the text if it overflows.
+ * @param {boolean} [props.muted] - Whether the component is muted.
+ * @param {boolean} [props.cap] - Whether to capitalize the text.
+ * @param {boolean} [props.tiny] - Whether to use a tiny font size.
+ * @param {boolean} [props.small] - Whether to use a small font size.
+ * @param {boolean} [props.thin] - Whether to use a thin line-height.
+ * @param {boolean} [props.border] - Whether to display a bottom border.
+ * @param {boolean} [props.bold=false] - Whether the text should be bold.
+ * @param {boolean} [props.fullWidth] - Whether the component should fill its container width.
+ * @param {boolean} [props.hover] - Whether the component should have a hover effect.
+ * @returns {JSX.Element} The Nowrap component.
+ */  
 const Nowrap = styled(Typography)(
   ({
     theme,

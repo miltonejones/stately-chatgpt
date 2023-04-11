@@ -3,7 +3,8 @@ import React from 'react';
 import { TextPopover, Photo, Flex } from '../../../styled';
 import { AuthContext } from '../../../machines';
 
-function ProfilePhotoForm({ currentPhoto, onPhotoChange }) {
+ 
+function ProfilePhotoForm() {
   const { authenticator } = React.useContext(AuthContext);
   if (!authenticator.user) {
     return <i />

@@ -425,11 +425,20 @@ export const useAuthenticator = (onSign) => {
     })
   }
  
+  const setLocale = value => {
+    send({
+      type: 'UPDATE',
+      key: 'locale',
+      value
+    })
+  }
+ 
 
   return {
     state,
     send, 
     setPhoto,
+    setLocale,
     diagnosticProps: {
       ...authenticatorMachine,
       state,
