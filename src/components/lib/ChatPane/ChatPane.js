@@ -702,8 +702,11 @@ const ChatPane = ({ handler }) => {
                           </Nowrap>
                         )} */}
                         <TinyButton icon="CopyAll" onClick={() => handler.clipboard.copy(response.answer)} />
-                        <TinyButton icon="Sync" onClick={() => regererate(i)} />
+                        <TinyButton 
+                          disabled={!handler.state.can('TEXT')}
+                          icon="Sync" onClick={() => regererate(i)} />
                         <TinyButton
+                          disabled={!handler.state.can('TEXT')}
                           icon={
                             response.id !== handler.editing
                               ? 'BorderColor'

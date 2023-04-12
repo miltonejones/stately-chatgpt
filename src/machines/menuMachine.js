@@ -120,34 +120,46 @@ const menuMachine = createMachine({
 });
 
 
+// Define the useMenu hook that takes a onChange callback as input
 export const useMenu = (onChange) => {
+  // Destructure the current state and the send function from the menuMachine state machine
   const [state, send] = useMachine(menuMachine, {
+    // Define a service for the menuClicked event
     services: {
       menuClicked: async (context, event) => {
+        // Call the onChange callback if it exists
         onChange && onChange(event.value);
-      }, },
-  }); 
+      },
+    },
+  });
 
+  // Destructure the anchorEl property from the state context
   const { anchorEl } = state.context;
+
+  // Define a function to close the menu and pass a value to the state machine
   const handleClose = (value) => () =>
     send({
       type: "close",
       value,
     });
-  const handleClick = (event, data) => {  
+
+  // Define a function to open the menu and pass an anchor element and some data to the state machine
+  const handleClick = (event, data) => {
     send({
       type: "open",
       anchorEl: event?.currentTarget,
-      data
+      data,
     });
   };
 
+  // Create a diagnosticProps object that contains the menuMachine, state, and send properties
   const diagnosticProps = {
     ...menuMachine,
     state,
     send,
   };
 
+  // Return an object that contains the state context, state, send, anchorEl, handleClick, handleClose, and diagnosticProps properties
   return {
     ...state.context,
     state,
@@ -157,6 +169,4 @@ export const useMenu = (onChange) => {
     handleClose,
     diagnosticProps,
   };
-
-
-}
+};

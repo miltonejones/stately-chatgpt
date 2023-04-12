@@ -194,8 +194,6 @@ const chatMachine = createMachine({
         ],
       },
     },
-
-
     speak: {
       initial: 'read_text',
       states: {
@@ -259,17 +257,25 @@ const chatMachine = createMachine({
       actions: "dropSession",
       description: "Drop selected session from user memory",
     },
-  },
+  }, 
   context: {
-    sessions: {}, 
+    // Object containing session data for each question
+    sessions: {},
+    // Array of objects containing previous answers from the current session
     answers: [],
+    // Index representing the temperature value for the ChatGPT API
     temperatureIndex: 1,
-    lang_code: 'es-ES', // 'en-US',
+    // Code for the language to use for API requests and responses
+    lang_code: DEFAULT_LANG,
+    // Array of objects representing available languages for translation
     demoLanguages,
+    // Type of response to expect from the ChatGPT API ('text' or 'image')
     responseType: 'text',
-    max_tokens: 8,
-    typeProps:  [
-        {
+    // Maximum number of tokens to generate for each response
+    max_tokens: 7,
+    // Array of objects representing available response types (text or image)
+    typeProps: [
+      {
         icon: "TextFields",
         caption:"Return text answers to chat prompts",
         value: "text",
@@ -282,6 +288,7 @@ const chatMachine = createMachine({
         label: "Images"
       }
     ],
+    // Array of objects representing available temperature levels for the ChatGPT API 
     tempProps: [
        {
         value: 0.1,
@@ -313,9 +320,10 @@ const chatMachine = createMachine({
 },
 {
   guards: {
+    // Check if there is a response text and that the response type is 'text', and that the state is not set to 'silent'
     isVocal: context => !!context.responseText && !context.silent && context.responseType === 'text',
+    // Check if the language code in the context is set to the default language
     isDefaultLang: context => context.lang_code === DEFAULT_LANG
-
   },
   actions: {
     /**
@@ -553,23 +561,48 @@ const chatMachine = createMachine({
   }
 });
 
-
+/**
+ * A custom React hook that provides chat-related functionality, including speech recognition, text-to-speech,
+ * chat session management, and translation services.
+ * @function useChat
+ * @returns {Object} An object that includes the current state of the chat machine, the ability to send events to the machine,
+ * a clipboard object for copying chat messages, diagnostic properties for debugging purposes, a boolean value indicating if the viewport is
+ * mobile, and the current context of the chat machine.
+ */
 export const useChat = () => {  
   const clipboard = useClipboard()
 
   const [state, send] = useMachine(chatMachine, {
     services: {
-      loadModels: async() => {
-        return await getModels();
-      },
+          /**
+           * Loads all available models for the chat machine from the server.
+           * @async
+           * @function loadModels
+           * @returns {Promise<Object>} - A promise that resolves to an object containing all available models.
+           */
+          loadModels: async() => {
+            return await getModels();
+        },
 
-      stopListening: async() => {
-        return recognition.stop();
-      },
+        /**
+         * Stops speech recognition.
+         * @async
+         * @function stopListening
+         * @returns {Promise<void>} - A promise that resolves when speech recognition has stopped.
+         */
+        stopListening: async() => {
+            return recognition.stop();
+        },
 
-      startListening: async() => {
-        return recognition.start();
-      },
+        /**
+         * Starts speech recognition.
+         * @async
+         * @function startListening
+         * @returns {Promise<void>} - A promise that resolves when speech recognition has started.
+         */
+        startListening: async() => {
+            return recognition.start();
+        },
 
       /**
        * Speaks the given text using the system's text-to-speech (TTS) functionality.
@@ -615,8 +648,7 @@ export const useChat = () => {
               reader.readAsText(file.Body);
   
               reader.onload = () => {
-                const json = JSON.parse(reader.result);
-                // console.log('JSON file retrieved:', json);
+                const json = JSON.parse(reader.result); 
                 resolve(json)
               };
             } catch (ex) {
@@ -876,11 +908,7 @@ const speek = (msg, lang) => {
   synth.speak(utterThis);
 }
 
-
-
-const API_ENDPOINT = 'https://69ksjlqa37.execute-api.us-east-1.amazonaws.com';
-
-
+ 
 /**
  * Translates the given text to the specified target language using a third-party translation API.
  * @async
@@ -899,7 +927,7 @@ export const translateText = async (target, value) => {
       target: [target]
     }),
   };
-  const response = await fetch(API_ENDPOINT, requestOptions );
+  const response = await fetch(process.env.REACT_APP_TRANSLATE_ENDPOINT, requestOptions );
   return await response.json();
 };
  
@@ -908,18 +936,11 @@ export const translateText = async (target, value) => {
 /**
  * Attaches a click event listener to all <pre> tags in the document, invoking the specified click handler when a tag is clicked.
  * @function attachPreclick
- * @param {function} handleClick - The click event handler to be attached to the <pre> tags.
- * @returns {function} - A function that removes the click event listeners when called.
+ * @param {function} handleClick - The click event handler to be attached to the <pre> tags. 
  */
 function attachPreclick(handleClick) {
   const preTags = document.querySelectorAll("pre");
   preTags.forEach((tag) => {
     tag.addEventListener("click", handleClick);
-  });
-
-  return () => {
-    preTags.forEach((tag) => {
-      tag.removeEventListener("click", handleClick);
-    });
-  };
+  }); 
 }
