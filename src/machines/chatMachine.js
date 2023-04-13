@@ -908,7 +908,7 @@ const speek = (msg, lang) => {
   synth.speak(utterThis);
 }
 
- 
+ const REACT_APP_TRANSLATE_ENDPOINT = "https://69ksjlqa37.execute-api.us-east-1.amazonaws.com";
 /**
  * Translates the given text to the specified target language using a third-party translation API.
  * @async
@@ -927,7 +927,7 @@ export const translateText = async (target, value) => {
       target: [target]
     }),
   };
-  const response = await fetch(process.env.REACT_APP_TRANSLATE_ENDPOINT, requestOptions );
+  const response = await fetch(REACT_APP_TRANSLATE_ENDPOINT, requestOptions );
   return await response.json();
 };
  
