@@ -317,7 +317,7 @@ A styled component for rendering a chat window with adjustable column widths.
 const ChatWindow = styled((props) => <Columns {...props}  columns={props.small ? '1fr' : '20vw 1fr'}/>)(
   ({ theme}) => ({
     alignItems: 'flex-start', 
-    height: `calc(100vh - ${FOOTER_OFFSET}px)`,
+    height: `calc(100svh - ${FOOTER_OFFSET}px)`,
     backgroundColor: theme.palette.common.white
   }))
 
@@ -328,7 +328,7 @@ A styled component for rendering a sidebar with a specific height, background co
 */
 const Sidebar = styled(Box)(
   ({ theme}) => ({
-    height: `calc(100vh - 12px - ${FOOTER_OFFSET}px)`,
+    height: `calc(100svh - 12px - ${FOOTER_OFFSET}px)`,
     backgroundColor: theme.palette.grey[100],
     paddingTop: theme.spacing(1),
   }));
@@ -345,7 +345,7 @@ const Sidebar = styled(Box)(
  * @returns {Object} An object containing the styles for the Workspace component.
  */
 const Workspace = styled(Box)(({ theme }) => ({
-  height: `calc(100vh - 100px - ${FOOTER_OFFSET}px)`,
+  height: `calc(100svh - 100px - ${FOOTER_OFFSET}px)`,
   overflow: 'auto'
 }));
 
