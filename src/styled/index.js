@@ -1,3 +1,5 @@
+import TruncateText from './TruncateText';
+import FlexButton from './FlexButton';
 import Pill from './Pill';
 import StackedMenuItem from './StackedMenuItem';
 import TimerProgress from './TimerProgress';
@@ -17,6 +19,8 @@ import IconTextField from './IconTextField';
 import Btn from './Btn';
 
 export {
+  TruncateText,
+  FlexButton,
   Pill,
   StackedMenuItem,
   TimerProgress,

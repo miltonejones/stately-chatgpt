@@ -16,21 +16,29 @@ import {
   Flex,
   Nowrap,
   Btn,
-  TextIcon,
-  ConfirmPop,
+  TextIcon, 
   IconTextField,
-  TinyButton,
-  TextPopover,
+  TinyButton, 
   Spacer,
-  TimerProgress,
+  TimerProgress, 
   StackedMenuItem
 } from '../../../styled';
 import ReactMarkdown from 'react-markdown';
-import Login from '../Login/Login';
+// import Login from '../Login/Login';
 import ProfilePhotoForm from '../ProfilePhotoForm/ProfilePhotoForm';
 import EngineMenu from '../EngineMenu/EngineMenu';
 import { AuthContext } from '../../../machines';
+
+import { SidebarMenu, SessionList, QuestionItem } from './components';
  
+const QuestionBox = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(0, 1),
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  height: 'calc(100% - 60px)', 
+  marginTop: 2,
+}))
 
 const FOOTER_OFFSET = 40;
 
@@ -55,20 +63,13 @@ interface for interacting with a chatbot and managing past conversations.
  */
 const QuestionList = ({ handler, handleChange }) => {
   const disabled = !handler.state.matches('request.response');
-  const { authenticator } = React.useContext(AuthContext);
-  const { demoLanguages, lang_code } = handler;
-  const currentLang = Object.keys(demoLanguages).find(
-    (lang) => demoLanguages[lang] === lang_code
-  );
-  
-  // const renderers = {
-  //   code: CodeBlock,
-  // };
+  const { authenticator } = React.useContext(AuthContext);  
 
-  const priorQuestions = Object.keys(handler.sessions);
-  const firstQuestion = !handler.answers.length
-    ? null
-    : handler.answers[handler.answers.length - 1].question;
+  const sidebarProps = {
+    handler,
+    authenticator,
+    handleChange
+  }; 
 
   return (
     <>
@@ -89,158 +90,22 @@ const QuestionList = ({ handler, handleChange }) => {
           new chat
         </Btn>
       </Flex>
-{/* [{authenticator.user?.attributes.locale}] */}
-      <Box
-        sx={{
-          p: (theme) => theme.spacing(0, 1),
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          height: 'calc(100% - 60px)',
-          // border: 1,
-          // borderColor: 'divider' ,
-          mt: 2,
-        }}
-      >
-        <Box>
-          {!!handler.answers.length && (
-            <Bar active>
-              <Nowrap>{firstQuestion}</Nowrap>
-              <TinyButton icon="BorderColor" />
-
-              <ConfirmPop
-              
-              message="Are you are you want to remove this conversation?"
-              label="Confirm clear"
-              okayText="delete"
-              onChange={(ok) => !!ok && handler.send({
-                type: 'DROP',
-                question: firstQuestion
-              })}  
-              >
-
-              <TinyButton icon="Delete" />
-              </ConfirmPop>
-            </Bar>
-          )}
-
-          {priorQuestions
-            .filter((query) => query !== firstQuestion)
-            .map((query) => (
-              <Bar
-                onClick={() => {
-                  handler.send({
-                    type: 'RESTORE',
-                    answers: handler.sessions[query],
-                  });
-                }}
-              >
-                <TinyButton icon="Chat" />
-                <Nowrap muted hover>
-                  {query}
-                </Nowrap>
-              </Bar>
-            ))}
-        </Box>
+      
+      <QuestionBox>  
+        
+        <SessionList handler={handler} />
 
         {/* sidebar options menu */}
-        <Stack>
-          {/* clear conversations fires CLEAR event  */}
-          {!!priorQuestions.length && <ConfirmPop 
-              message="Are you are you want to clear all your conversations?"
-              label="Confirm clear"
-              okayText="Clear conversations"
-              onChange={(ok) => !!ok && handler.send('CLEAR')}
-            >
-          <Bar>
-            <TinyButton icon="Delete" />
-            <Nowrap hover>Clear conversations</Nowrap>
-          </Bar>
-          </ConfirmPop>}
-          {/* voice language settings */}
-          <Bar>
-            <TinyButton
-              color={handler.silent ? 'inherit' : 'error'}
-              icon={!handler.silent ? 'RecordVoiceOver' : 'VoiceOverOff'}
-            />
-            <Nowrap
-              muted={!!handler.silent}
-              onClick={() => handleChange('silent', !handler.silent)}
-              hover
-            >
-              Use <b>{currentLang}</b> voice
-            </Nowrap>
-            <Spacer />
-            <TextPopover
-              name="lang_code"
-              description="Select a language for spoken responses"
-              label="Choose language"
-              onChange={(e) => {
-                handleChange('lang_code', e.target.value)
-                authenticator.setLocale(e.target.value);
-              }}
-              value={handler.lang_code}
-              options={Object.keys(handler.demoLanguages).map((label) => ({
-                value: handler.demoLanguages[label],
-                label,
-              }))}
-            >
-              <TinyButton disabled={handler.silent} icon="Settings" />
-            </TextPopover>
-          </Bar>
-
-          {/* log in/out menu   */}
-          <Login>
-            <Bar sx={{ mb: 4 }}>
-              <TinyButton icon="Lock" />
-              <Nowrap hover>Sign {!!handler.user ? 'Out' : 'In'}</Nowrap>
-            </Bar>
-          </Login>
-        </Stack>
-      </Box>
+        <SidebarMenu {...sidebarProps} />
+ 
+      </QuestionBox>
     </>
   );
 };
 
-/**
-A styled component that renders a Flex component with additional styling.
-@component
-@param {Object} props - The props object.
-@param {boolean} [props.active] - Determines if the component is active.
-@param {number} [props.spacing=1] - The spacing between child elements.
-@returns {JSX.Element} - A Flex component with additional styling.
-@example
-<Bar active spacing={2}>
-<ChildComponent />
-</Bar>
-/ const Bar = styled((props) => <Flex {...props} spacing={1} />)( */
-const Bar = styled((props) => <Flex {...props} spacing={1} />)(
-  ({ theme, active }) => ({
-    margin: theme.spacing(0.5, 0),
-    padding: theme.spacing(1),
-    borderRadius: '.25rem',
-    backgroundColor: !active ? 'transparent' : theme.palette.grey[300],
-    maxWidth: '19vw',
-    [theme.breakpoints.down('md')]: {
-      maxWidth: '75vw',
-    },
-    '&:hover': {
-      backgroundColor: theme.palette.grey[300],
-    },
-  })
-);
+ 
 
-/**
-A styled component for rendering a question with specific typography styling.
-@param {Object} props - The props object for the component.
-@returns {JSX.Element} - The question component.
-*/
-const Question = styled('p')(({ theme }) => ({
-  fontSize: '0.9rem',
-  padding: 0,
-  margin: 0,
-  fontWeight: 600,
-}));
+ 
 
 /** 
 A styled component for rendering a layout with no margin.
@@ -385,6 +250,20 @@ const ChatPane = ({ handler }) => {
     });
   };
 
+  const updateQuestion = (response) => (event) => {
+    handleChange(
+      'answers',
+      handler.answers.map((res) =>
+        res.id === response.id
+          ? {
+              ...res,
+              question: event.target.value,
+            }
+          : res
+      )
+    );
+  } 
+
   const regererate = (index) => {
     const { question, responseType } = handler.answers[index];
 
@@ -398,10 +277,17 @@ const ChatPane = ({ handler }) => {
     });
   };
 
-  const timerLimit = Math.pow (handler.max_tokens - 6, 3)
+  const timerLimit = Math.pow (handler.max_tokens - 6, 3);
+  const questionProps = {
+    handler, 
+    regererate, 
+    updateQuestion
+  }
 
   return (
     <Layout>
+
+
       <ChatWindow small={isMobileViewPort}>
         {!isMobileViewPort && (
           <Sidebar>
@@ -410,6 +296,8 @@ const ChatPane = ({ handler }) => {
         )}
 
         <Box>
+
+          {/* search/menu bar */}
           <form
             style={{ width: '100%' }}
             onSubmit={(e) => {
@@ -428,6 +316,8 @@ const ChatPane = ({ handler }) => {
                 </IconButton>
               )}
               <IconTextField
+                multiline={ handler.responseType === 'code'}
+                rows={8}
                 sx={
                   isMobileViewPort
                     ? {
@@ -455,6 +345,8 @@ const ChatPane = ({ handler }) => {
                         icon={
                           handler.responseType === 'image'
                             ? 'Photo'
+                            : handler.responseType === 'code'
+                            ? 'Code'
                             : 'TextFields'
                         }
                       />
@@ -491,6 +383,8 @@ const ChatPane = ({ handler }) => {
                 placeholder={
                   handler.responseType === 'image'
                     ? 'Describe an image and I will make it'
+                    : handler.responseType === 'code'
+                    ? 'Type or paste code'
                     : 'Type or speak a question'
                 }
                 name="requestText"
@@ -507,6 +401,8 @@ const ChatPane = ({ handler }) => {
             </Flex>
           </form>
 
+
+          
           <Workspace>
             {/* something to look at while the bot is thinking */}
             {handler.state.matches('request.query') && (
@@ -615,17 +511,17 @@ const ChatPane = ({ handler }) => {
                     {!!isMobileViewPort && (
                       <>
           
-                      <EngineMenu engine handler={handler}>
-                        <Card sx={{ p: 1 }}>
-                          <StackedMenuItem bold {...tempProp}>
-                            {tempProp.label}
-                          </StackedMenuItem>
-                        </Card>
+                        <EngineMenu engine handler={handler}>
+                          <Card sx={{ p: 1 }}>
+                            <StackedMenuItem bold {...tempProp}>
+                              {tempProp.label}
+                            </StackedMenuItem>
+                          </Card>
                         </EngineMenu>
 
                         <Nowrap  sx={{mt: 3}} small muted>
-                        Response mode
-                      </Nowrap>
+                          Response mode
+                        </Nowrap>
                       
                       </>
                     )}
@@ -637,9 +533,7 @@ const ChatPane = ({ handler }) => {
                           {typeProp.label}
                         </StackedMenuItem>
                       </Card>
-                      </EngineMenu>
-
-                    {/* {JSON.stringify(typeProp)} */}
+                    </EngineMenu>  
 
                   </>
                 )}
@@ -660,51 +554,25 @@ const ChatPane = ({ handler }) => {
                         }}
                       >
 
-
-                        <Question wrap small>
-                      
-                          {response.id !== handler.editing ? (
-                            <>{response.question}</>
-                          ) : (
-                            <IconTextField
-                              endIcon={
-                                <IconButton onClick={() => regererate(i)}>
-                                  <TextIcon icon="Telegram" />
-                                </IconButton>
-                              }
-                              googlish
-                              sx={{ minWidth: '50vw' }}
-                              fullWidth
-                              size="small"
-                              onChange={(e) => {
-                                handleChange(
-                                  'answers',
-                                  handler.answers.map((res) =>
-                                    res.id === response.id
-                                      ? {
-                                          ...res,
-                                          question: e.target.value,
-                                        }
-                                      : res
-                                  )
-                                );
-                              }}
-                              value={response.question}
-                            />
-                          )}
-                        </Question>
-
+                        <QuestionItem
+                          index={i}
+                          response={response}
+                          {...questionProps}
+                          />  
 
                         <Spacer />
-                        {/* {!isNaN(response.responseTime) && (
-                          <Nowrap tiny muted>
-                            {response.responseTime / 1000}s
-                          </Nowrap>
-                        )} */}
-                        <TinyButton icon="CopyAll" onClick={() => handler.clipboard.copy(response.answer)} />
+                        
+                        <TinyButton 
+                          icon="CopyAll" 
+                          onClick={() => handler.clipboard.copy(response.answer)} 
+                        />
+                        
                         <TinyButton 
                           disabled={!handler.state.can('TEXT')}
-                          icon="Sync" onClick={() => regererate(i)} />
+                          icon="Sync" 
+                          onClick={() => regererate(i)} 
+                        />
+                        
                         <TinyButton
                           disabled={!handler.state.can('TEXT')}
                           icon={
@@ -722,23 +590,30 @@ const ChatPane = ({ handler }) => {
                       </Flex>
 
                     {/* answer text  */}
-                      <ReactMarkdown key={i}>{response.answer}</ReactMarkdown>
 
-                      {response.finish_reason === 'length' && <Alert sx={{ m: 1, width: '98%' }} severity="warning">
+                    {response.responseType === 'code' && !response.answer.includes("`") ? <pre>{response.answer}</pre> :  <ReactMarkdown key={i}>{response.answer}</ReactMarkdown>}
+                     
+
+                      {response.finish_reason === 'length' && (
+                        <Alert sx={{ m: 1, width: '98%' }} severity="warning">
                           <Stack> 
                             <Nowrap hover onClick={() => regererate(i)}
                               bold small error>Response is incomplete. </Nowrap> 
                             <Nowrap small muted>Allocate more tokens and try again</Nowrap>
                           </Stack>
                         </Alert> 
-                        } 
+                      )} 
                     </>
                   ))}
               </Answers>
             } 
           </Workspace>
         </Box>
+
+
       </ChatWindow>
+
+
       <Drawer
         open={handler.sidebarOpen && isMobileViewPort}
         onClose={() => handleChange('sidebarOpen', false)}

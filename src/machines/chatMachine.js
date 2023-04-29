@@ -286,7 +286,13 @@ const chatMachine = createMachine({
         caption:"Return images you describe",
         value: "image",
         label: "Images"
-      }
+      },
+      {
+        icon: "Code",
+        caption:"Audit/update code snippet",
+        value: "code",
+        label: "Code"
+      },
     ],
     // Array of objects representing available temperature levels for the ChatGPT API 
     tempProps: [
@@ -525,6 +531,7 @@ const chatMachine = createMachine({
       const { message, finish_reason } = choices[0]; 
       return {
         responseText: message.content,
+        responseType: responseType === 'code' ? 'text' : responseType,
         requestText: "",
         answers: [{
           responseType,
@@ -743,20 +750,35 @@ export const useChat = () => {
         const { requestText, responseType, answers, tempProps, 
                 temperatureIndex, start_index } = context;
         const { value } = tempProps[temperatureIndex];
-        const create = q => ({"role": "user", "content": q.question});
+        const instructions = responseType === 'code' ? `
+          Rewrite this to be more efficient and legible.
+          Change names where appropriate.
+          Add verbose comments.
+          addJSDoc comments.
+          Add verbose comments
+          Response should be a code block
+        ` : '';
+        
+        const create = q => ({"role": "user", "content": instructions + q.question});
+
         const size = isMobileViewPort ? 256 : 1024;
+        const tokenSize = responseType === 'code' ? Math.ceil(requestText.length * 1.5) : Math.pow(2, context.max_tokens)
 
         const convo = !!start_index 
           ? answers.slice(0, start_index + 1).map(create) 
           : answers.map(create)
-              .concat({"role": "user", "content": requestText});
+              .concat(create({question: requestText}));
 
         if (responseType === 'image') {
           return generateImage(requestText, size)
         }
 
-        return await generateText (convo, value, Math.pow(2, context.max_tokens))
+        return await generateText (convo, value, tokenSize)
       },
+ 
+
+
+
    },
   }); 
   

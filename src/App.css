@@ -27,6 +27,15 @@ pre::before {
   opacity: 0.3;
 }
 
+pre:hover:before { 
+  opacity: 1;
+}
+
+pre:active:before { 
+  content: "📋 Copied!";
+  opacity: .5;
+}
+
 /* Sets the margin for the body element to 0, hides the overflow, and sets the background color to #ebebeb. */
 body {
   margin: 0;
