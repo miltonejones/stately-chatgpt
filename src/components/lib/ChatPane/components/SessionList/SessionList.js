@@ -50,6 +50,7 @@ const SessionList = (props) => {
 
       {priorQuestions
         .filter((query) => query !== lastQuestion)
+        .slice(priorQuestions.length - 10)
         .map((query) => (
           <FlexButton key={query} onClick={() => handleRestore(query)}>
             <TinyButton icon="Chat" />

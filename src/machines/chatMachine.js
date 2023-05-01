@@ -123,10 +123,25 @@ const chatMachine = createMachine({
             onDone: [
               {
                 target: 'response',
+                cond: (_, event) =>  !!event.data.error,
+                actions: assign((_, event) => ({
+                  error: event.data.error
+                })),
+              },
+              {
+                target: 'response',
                 actions: 'assignResponse',
               },
             ],
           },
+        },
+
+        problem: {
+          on: {
+            RECOVER: {
+
+            }
+          }
         },
 
         response: {
@@ -512,6 +527,7 @@ const chatMachine = createMachine({
         return {
           responseText: url,
           requestText: "",
+          error: null,
           answers: [{
             responseType,
             responseTime: new Date().getTime() - context.timestamp,
@@ -533,6 +549,7 @@ const chatMachine = createMachine({
         responseText: message.content,
         responseType: responseType === 'code' ? 'text' : responseType,
         requestText: "",
+        error: null,
         answers: [{
           responseType,
           responseTime: new Date().getTime() - context.timestamp,
@@ -867,6 +884,7 @@ const generateImage = async(prompt, width) => {
  * @returns {Promise<Object>} - A Promise that resolves with an object representing the generated text
  */
 const generateText = async (messages, temperature, max_tokens = 128) => {
+  const model = "gpt-3.5-turbo-0301";
   const requestOptions = {
     method: "POST",
     headers: {
@@ -876,7 +894,7 @@ const generateText = async (messages, temperature, max_tokens = 128) => {
     body: JSON.stringify({
       messages,
       temperature,
-      model: "gpt-3.5-turbo",
+      model,
       max_tokens
     }),
   };

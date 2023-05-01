@@ -404,6 +404,8 @@ const ChatPane = ({ handler }) => {
 
           
           <Workspace>
+
+           {!!handler.error && <>{JSON.stringify(handler.error)}</> }
             {/* something to look at while the bot is thinking */}
             {handler.state.matches('request.query') && (
               <TimerProgress component={LinearProgress} limit={timerLimit} auto />
